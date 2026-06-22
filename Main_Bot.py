@@ -22,7 +22,7 @@ def main():
     return "OK"
 
 
-@bot_app.route("/webhook", methods="POST")
+@bot_app.route("/webhook", methods=["POST"])
 def webhook():
 
     data = requests.json
