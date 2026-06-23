@@ -4,7 +4,7 @@ from flask import Flask, request
 token = "1744473316:w5VeFENuKnbmKtWhmDfB0St5gOfcp3Y6_9g"
 url = f"https://tapi.bale.ai/bot{token}/setWebhook"
 # define your local host as url
-webhook = ""
+webhook = "https://earliest-entities-arrived-sandwich.trycloudflare.com"
 
 
 def set_webhook(url_token, webhook):
@@ -25,11 +25,11 @@ def main():
 @bot_app.route("/webhook", methods=["POST"])
 def webhook():
 
-    data = requests.json
+    data = request.json
     print(data)
 
     return "OK"
 
 
 if __name__ == "__main__":
-    bot_app.run(host=5000, debug=True)
+    bot_app.run(port="5000", debug=True)

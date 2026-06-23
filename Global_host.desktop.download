@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Global_host
+Comment=
+Exec=ssh -R 80:localhost:5001 nokey@localhost.run
+Icon=
+Path=
+Terminal=true
+StartupNotify=false
