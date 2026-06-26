@@ -1,3 +1,13 @@
+# virtual environment
 .venv/
+venv/lk
+
+# python trashs
 __pycashe__/
+
+# VS code
+.vscode/
+
+# Author trashs
 Rotin_GIT.txt
+
