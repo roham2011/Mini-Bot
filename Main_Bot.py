@@ -7,25 +7,25 @@ app = Flask(__name__)
 
 user_state = {}
 
-BOT_TOKEN = "YOUR_TOKEN"
+BOT_TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 SEND_MESSAGE_URL = f"https://tapi.bale.ai/bot{BOT_TOKEN}/sendMessage"
 
-WEBHOOK_URL = "https://97eabdd3e26e80.lhr.life/webhook"
+WEBHOOK_URL = "https://e01aa7fb4e5f4f.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
 
-def ask_llm(text: str) -> str:
+def ask_llm(text: str):
     """Generate an LLM response."""
     return "it's llm response"
 
 
-def reports(user_id: int, text: str) -> None:
+def reports(user_id: int, text: str):
     """Handle user reports."""
     print(f"Report from {user_id}: {text}")
 
 
-def post_message(payload: dict) -> None:
+def post_message(payload: dict):
     """Send a request to Bale API."""
     try:
         requests.post(
@@ -37,7 +37,7 @@ def post_message(payload: dict) -> None:
         print(f"Send message error: {exc}")
 
 
-def send_message(chat_id: int, text: str) -> None:
+def send_message(chat_id: int, text: str):
     """Send a text message."""
     payload = {
         "chat_id": chat_id,
@@ -46,7 +46,7 @@ def send_message(chat_id: int, text: str) -> None:
     post_message(payload)
 
 
-def send_start_menu(chat_id: int) -> None:
+def send_start_menu(chat_id: int):
     """Send start menu."""
     payload = {
         "chat_id": chat_id,
@@ -76,7 +76,50 @@ def send_start_menu(chat_id: int) -> None:
     post_message(payload)
 
 
-def send_about(chat_id: int) -> None:
+def send_help(user_id: int):
+    """Send help messege"""
+    payload = {
+        "chat_id": user_id,
+        "text": "📖 راهنمای استفاده از RAG Bot\n\n"
+        "💬 /ChatMode\n"
+        "گفتگو با دستیار هوشمند.\n\n"
+        "📝 /Report\n"
+        "ثبت باگ، تجربه یا پیشنهاد.\n\n"
+        "ℹ️ /About\n"
+        "اطلاعات سازنده و پروژه.\n\n"
+        "❌ /Exit\n"
+        "خروج از حالت گفتگو.\n\n"
+        "📚 /Help\n"
+        "نمایش این راهنما.",
+        "reply_markup": {
+            "inline_keyboard": [
+                [{"text": "/ChatMode", "callback_data": "/ChatMode"}],
+                [
+                    {
+                        "text": "/Rpoert",
+                        "callback_data": "/Report",
+                    }
+                ],
+                [
+                    {
+                        "text": "/About",
+                        "callback_data": "/About",
+                    }
+                ],
+                [
+                    {
+                        "text": "/Exit",
+                        "callback_data": "/Exit",
+                    }
+                ],
+                [{"text": "/help", "callback_data": "/help"}],
+            ]
+        },
+    }
+    post_message(payload)
+
+
+def send_about(chat_id: int):
     """Send about message."""
     payload = {
         "chat_id": chat_id,
@@ -99,12 +142,13 @@ def send_about(chat_id: int) -> None:
 @app.route("/webhook", methods=["POST"])
 def webhook():
     """Handle Bale webhook requests."""
+
     data = request.get_json(silent=True) or {}
+
+    print("New Data:", data)
 
     text = None
     user_id = None
-
-    print("**New Data**", data)
 
     if "message" in data:
         text = data["message"].get("text")
@@ -114,36 +158,56 @@ def webhook():
         text = data["callback_query"].get("data")
         user_id = data["callback_query"]["from"]["id"]
 
-    elif not text or user_id is None:
-        pass
+    if text is None or user_id is None:
+        return "ok"
 
-    elif text == "/ChatMode":
-        user_state[user_id] = "Chat"
-        send_message(user_id, "Welcome to ChatMode!")
+    print("User:", user_id)
+    print("Text:", text)
 
-    elif text == "/Exit":
-        user_state[user_id] = "Normal"
-        send_message(user_id, "Welcome to Normal Mode!")
+    # ---------- Commands ----------
 
-    elif text == "/Start":
+    if text == "/start":
         send_start_menu(user_id)
+        return "ok"
+
+    elif text == "/help":
+        send_help(user_id)
+        return "ok"
 
     elif text == "/About":
         send_about(user_id)
+        return "ok"
+
+    elif text == "/ChatMode":
+        user_state[user_id] = "Chat"
+        send_message(user_id, "Welcome to Chat Mode!")
+        return "ok"
 
     elif text == "/Report":
         user_state[user_id] = "Report"
-        send_message(user_id, "Submit your report.")
+        send_message(user_id, "گزارش خود را ارسال کنید.")
+        return "ok"
 
-    elif user_state.get(user_id) == "Report":
-        reports(user_id, text)
-        send_message(user_id, "Report received.")
+    elif text == "/Exit":
         user_state[user_id] = "Normal"
+        send_message(user_id, "از حالت گفتگو خارج شدید.")
+        return "ok"
 
-    elif user_state.get(user_id) == "Chat":
+    # ---------- Report Mode ----------
+
+    if user_state.get(user_id) == "Report":
+        reports(user_id, text)
+        send_message(user_id, "✅ گزارش شما ثبت شد.")
+        user_state[user_id] = "Normal"
+        return "ok"
+
+    # ---------- Chat Mode ----------
+
+    if user_state.get(user_id) == "Chat":
         answer = ask_llm(text)
         send_message(user_id, answer)
         return "ok"
+
     return "ok"
 
 

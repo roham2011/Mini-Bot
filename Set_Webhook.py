@@ -1,6 +1,6 @@
 import requests
 
-TOKEN = "1744473316:w5VeFENuKnbmKtWhmDfB0St5gOfcp3Y6_9g"
+TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 URL = f"https://tapi.bale.ai/bot{TOKEN}/setWebhook"
 
 
