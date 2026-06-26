@@ -15,10 +15,14 @@ Python 3.11+
 - SQLite database support
 
 ## Project Structuremain
-|-main
+|-mai
+
 ├── Global_host.desktop.download
+
 ├── Main_Bot.py
+
 ├── requirements.txt
+
 └── Set_Webhook.py
 
 ## Run
