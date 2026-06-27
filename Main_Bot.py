@@ -1,16 +1,18 @@
 from flask import Flask, request
 import requests
-
+from Pata_Base.database import reports
+from Pata_Base.database import get_reports
+# from Pata_Base.database import get_reports_by_user
 from Set_Webhook import set_webh
 
 app = Flask(__name__)
 
 user_state = {}
 
-BOT_TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
-SEND_MESSAGE_URL = f"https://tapi.bale.ai/bot{BOT_TOKEN}/sendMessage"
+TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
+URL = f"https://tapi.bale.ai/bot{TOKEN}/sendMessage"
 
-WEBHOOK_URL = "https://e01aa7fb4e5f4f.lhr.life/webhook"
+WEBHOOK_URL = "https://4c62fed773a5d7.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
@@ -20,16 +22,11 @@ def ask_llm(text: str):
     return "it's llm response"
 
 
-def reports(user_id: int, text: str):
-    """Handle user reports."""
-    print(f"Report from {user_id}: {text}")
-
-
 def post_message(payload: dict):
     """Send a request to Bale API."""
     try:
         requests.post(
-            SEND_MESSAGE_URL,
+            URL,
             json=payload,
             timeout=10,
         )
@@ -164,7 +161,7 @@ def webhook():
     print("User:", user_id)
     print("Text:", text)
 
-    # ---------- Commands ----------
+    # Commands
 
     if text == "/start":
         send_start_menu(user_id)
@@ -180,7 +177,7 @@ def webhook():
 
     elif text == "/ChatMode":
         user_state[user_id] = "Chat"
-        send_message(user_id, "Welcome to Chat Mode!")
+        send_message(user_id, "به حالت گفت و گو با هوش مصنویی وارد شدید!")
         return "ok"
 
     elif text == "/Report":
@@ -193,15 +190,16 @@ def webhook():
         send_message(user_id, "از حالت گفتگو خارج شدید.")
         return "ok"
 
-    # ---------- Report Mode ----------
+    # Report Mode
 
     if user_state.get(user_id) == "Report":
         reports(user_id, text)
         send_message(user_id, "✅ گزارش شما ثبت شد.")
+        get_reports(user_id)
         user_state[user_id] = "Normal"
         return "ok"
 
-    # ---------- Chat Mode ----------
+    # Chat Mode
 
     if user_state.get(user_id) == "Chat":
         answer = ask_llm(text)
@@ -218,7 +216,4 @@ def test_webhook(name: str):
 
 
 if __name__ == "__main__":
-    app.run(
-        debug=True,
-        port=5001,
-    )
+    app.run(debug=True,port=5002,)
