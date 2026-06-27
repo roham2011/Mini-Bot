@@ -12,11 +12,11 @@ user_state = {}
 TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 URL = f"https://tapi.bale.ai/bot{TOKEN}/sendMessage"
 
-WEBHOOK_URL = "https://c43507b9898741.lhr.life/webhook"
+WEBHOOK_URL = "https://e4bfc05017d11a.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
-def user_panel(user_id):
+def send_user_panel(user_id):
     payload = {
     "chat_id": user_id,
     "text": (
@@ -149,6 +149,39 @@ def send_help(user_id: int):
     }
     post_message(payload)
 
+def send_help(user_id: int):
+    """Send help messege"""
+    payload = {
+        "chat_id": user_id,
+        "text": "📖 راهنمای استفاده از RAG Bot\n\n"
+        "گزینه مد نظر خود را نتخاب کنید .\n\n" ,
+        "reply_markup": {
+            "inline_keyboard": [
+                [{"text": "/ChatMode", "callback_data": "/ChatMode"}],
+                [
+                    {
+                        "text": "ثبت گزارش",
+                        "callback_data": "/Report",
+                    }
+                ],
+                [
+                    {
+                        "text": "درباره ما",
+                        "callback_data": "/About",
+                    }
+                ],
+                [
+                    {
+                        "text": "خارج شدن از گفت و گو با هوش مصنوعی",
+                        "callback_data": "/Exit",
+                    }
+                ],
+                [{"text": "/help", "callback_data": "/help"}],
+            ]
+        },
+    }
+    post_message(payload)
+
 
 def send_about(chat_id: int):
     """Send about message."""
@@ -168,12 +201,63 @@ def send_about(chat_id: int):
     }
 
     post_message(payload)
-def last_report(user_id):
+def send_count_report(user_id):
+    count_report = count_reports(user_id)
+    payload = {
+    "chat_id": user_id,
+    "text": (
+        f" تعداد گزارشات شما [{count_report}] بود .\n"
+        "اگر سوالی دارید، کافی است از ما بپرسید."
+    ),
+    "reply_markup": {
+        "inline_keyboard": [
+            [
+                {
+                    "text": "گفت و گو با مدل زبانی",
+                    "callback_data": "/ChatMode",
+                }
+            ],
+            [
+                {
+                    "text": "درباره ما",
+                    "callback_data": "/About",
+                }
+            ],
+                            [
+                {
+                    "text": "آخرین گزارش شما ",
+                    "callback_data": "/LastReport",
+                }
+            ]
+        ]
+    },
+}
+    post_message(payload)
+
+def send_about(chat_id: int):
+    """Send about message."""
+    payload = {
+        "chat_id": chat_id,
+        "text": 'This Bot was developed by "Roham".',
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "/ChatMode",
+                        "callback_data": "/ChatMode",
+                    }
+                ]
+            ]
+        },
+    }
+
+    post_message(payload)
+def send_last_report(user_id):
     las_report = get_last_report(user_id)
     payload = {
     "chat_id": user_id,
     "text": (
-        f" اخرین گزارش شما [{las_report}] بود .🌟\n"
+        f" اخرین گزارش شما [{las_report}] بود .\n"
         "اگر سوالی دارید، کافی است از ما بپرسید."
     ),
     "reply_markup": {
@@ -193,7 +277,7 @@ def last_report(user_id):
                             [
                 {
                     "text": "تعداد گزارشات شما ",
-                    "callback_data": "/LastReport",
+                    "callback_data": "/CountReport",
                 }
             ]
         ]
@@ -244,12 +328,17 @@ def webhook():
         return "ok" 
     
     elif text == "/UserPanel":
-        user_panel(user_id)
+        send_user_panel(user_id)
 
         return "ok"
     
     elif text == "/LastReport":
-        last_report(user_id)
+        send_last_report(user_id)
+
+        return "ok"
+    
+    elif text == "/CountReport":
+        send_count_report(user_id)
 
         return "ok"
     

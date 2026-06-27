@@ -64,9 +64,6 @@ def count_reports(user_id):
         FROM reports
         WHERE user_id = ?
     
-        """ , (user_id,user_id)
-    )
+        """ , (user_id,))
 
-    count_report = cursor.fetchall()[0]
-
-    return count_report
+    return cursor.fetchone()[0]
