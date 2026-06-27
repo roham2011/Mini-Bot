@@ -39,7 +39,34 @@ def get_reports(user_id: int):
 
     rows = cursor.fetchall()
 
-    print (rows)
-
     return rows
 
+def get_last_report(user_id):
+    
+    cursor.execute(
+        """
+        SELECT *
+        FROM reports
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+        """,(user_id,))
+    
+    last_report = cursor.fetchone()
+
+    return last_report 
+
+def count_reports(user_id):
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM reports
+        WHERE user_id = ?
+    
+        """ , (user_id,user_id)
+    )
+
+    count_report = cursor.fetchall()[0]
+
+    return count_report
