@@ -173,7 +173,7 @@ def last_report(user_id):
     payload = {
     "chat_id": user_id,
     "text": (
-        f" اخرین گزارش شما {las_report} بود .🌟\n"
+        f" اخرین گزارش شما [{las_report}] بود .🌟\n"
         "اگر سوالی دارید، کافی است از ما بپرسید."
     ),
     "reply_markup": {

@@ -45,7 +45,7 @@ def get_last_report(user_id):
     
     cursor.execute(
         """
-        SELECT *
+        SELECT text
         FROM reports
         WHERE user_id = ?
         ORDER BY id DESC
@@ -54,7 +54,7 @@ def get_last_report(user_id):
     
     last_report = cursor.fetchone()
 
-    return last_report 
+    return last_report[0]
 
 def count_reports(user_id):
 
