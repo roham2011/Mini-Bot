@@ -41,7 +41,7 @@ def get_reports(user_id: int):
 
     return rows
 
-def get_last_report(user_id):
+def get_last_report(user_id: int):
     
     cursor.execute(
         """
@@ -56,7 +56,7 @@ def get_last_report(user_id):
 
     return last_report[0]
 
-def count_reports(user_id):
+def count_reports(user_id: int):
 
     cursor.execute(
         """

@@ -16,7 +16,7 @@ WEBHOOK_URL = "https://e4bfc05017d11a.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
-def send_user_panel(user_id):
+def send_user_panel(user_id: int):
     payload = {
     "chat_id": user_id,
     "text": (
@@ -149,40 +149,6 @@ def send_help(user_id: int):
     }
     post_message(payload)
 
-def send_help(user_id: int):
-    """Send help messege"""
-    payload = {
-        "chat_id": user_id,
-        "text": "📖 راهنمای استفاده از RAG Bot\n\n"
-        "گزینه مد نظر خود را نتخاب کنید .\n\n" ,
-        "reply_markup": {
-            "inline_keyboard": [
-                [{"text": "/ChatMode", "callback_data": "/ChatMode"}],
-                [
-                    {
-                        "text": "ثبت گزارش",
-                        "callback_data": "/Report",
-                    }
-                ],
-                [
-                    {
-                        "text": "درباره ما",
-                        "callback_data": "/About",
-                    }
-                ],
-                [
-                    {
-                        "text": "خارج شدن از گفت و گو با هوش مصنوعی",
-                        "callback_data": "/Exit",
-                    }
-                ],
-                [{"text": "/help", "callback_data": "/help"}],
-            ]
-        },
-    }
-    post_message(payload)
-
-
 def send_about(chat_id: int):
     """Send about message."""
     payload = {
@@ -201,7 +167,7 @@ def send_about(chat_id: int):
     }
 
     post_message(payload)
-def send_count_report(user_id):
+def send_count_report(user_id : int):
     count_report = count_reports(user_id)
     payload = {
     "chat_id": user_id,
@@ -252,7 +218,7 @@ def send_about(chat_id: int):
     }
 
     post_message(payload)
-def send_last_report(user_id):
+def send_last_report(user_id: int):
     las_report = get_last_report(user_id)
     payload = {
     "chat_id": user_id,
