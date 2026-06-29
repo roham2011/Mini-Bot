@@ -15,18 +15,20 @@ Python 3.11+
 - SQLite database support
 
 ## Project Structure
+```text
 MINI-PROJS_Private/
 │
-├── Main_Bot.py                # (Flask + Webhook)
-├── Set_Webhook.py             # set WebHook
-├── requirements.txt            
-├── README.md                  # About
+├── Main_Bot.py          # Flask + Webhook
+├── Set_Webhook.py       # Set Webhook
+├── requirements.txt
+├── README.md            # About project
 ├── .gitignore
 │
 ├── Pata_Base/
-   ├── __init__.py
-   ├── database.py            #all functions SQLite
-   └── RAG.db     
+│   ├── __init__.py
+│   ├── database.py      # SQLite functions
+│   └── RAG.db
+```   
 ## Run
 After Clone Repo :
 bash >> python3 Main_Bot.py
