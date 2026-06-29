@@ -18,16 +18,27 @@ Python 3.11+
 ```text
 MINI-PROJS_Private/
 │
-├── Main_Bot.py          # Flask + Webhook
-├── Set_Webhook.py       # Set Webhook
+├── Main_Bot.py              # Flask + Webhook
+├── Set_Webhook.py
 ├── requirements.txt
-├── README.md            # About project
+├── README.md
 ├── .gitignore
 │
-├── Pata_Base/
+├── database/
 │   ├── __init__.py
-│   ├── database.py      # SQLite functions
+│   ├── db.py                # Connect to DB
+│   ├── models.py            # Class tables
+│   ├── crud.py              # DB statment
 │   └── RAG.db
+│
+├── handlers/
+│   ├── __init__.py
+│   ├── report.py
+│   └── chat.py
+│
+└── utils/
+    ├── __init__.py
+    └── send_message.py
 ```   
 ## Run
 After Clone Repo :
