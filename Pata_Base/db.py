@@ -7,7 +7,7 @@ db = sqlite3.connect(
 cursor = db.cursor()
 
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS reports(
+    CREATE TABLE IF NOT EXISTS reports(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     text TEXT

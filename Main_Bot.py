@@ -1,8 +1,8 @@
 from flask import Flask, request
 import requests
-from Pata_Base.database import reports
-from Pata_Base.database import count_reports
-from Pata_Base.database import get_last_report
+from Pata_Base.db import reports
+from Pata_Base.db import count_reports
+from Pata_Base.db import get_last_report
 from Set_Webhook import set_webh
 
 app = Flask(__name__)
@@ -58,7 +58,6 @@ def ask_llm(text: str):
     """Generate an LLM response."""
     return "it's llm response"
 
-
 def post_message(payload: dict):
     """Send a request to Bale API."""
     try:
@@ -70,7 +69,6 @@ def post_message(payload: dict):
     except requests.RequestException as exc:
         print(f"Send message error: {exc}")
 
-
 def send_message(chat_id: int, text: str):
     """Send a text message."""
     payload = {
@@ -78,7 +76,6 @@ def send_message(chat_id: int, text: str):
         "text": text,
     }
     post_message(payload)
-
 
 def send_start_menu(chat_id: int):
     """Send start menu."""
@@ -114,7 +111,6 @@ def send_start_menu(chat_id: int):
     }
 
     post_message(payload)
-
 
 def send_help(user_id: int):
     """Send help messege"""

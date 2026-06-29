@@ -1,13 +1,43 @@
-# virtual environment
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# V-env
 .venv/
-venv/lk
+venv/
+env/
 
-# python trashs
-__pycashe__/
+# SQLite
+*.db
+*.sqlite3
 
-# VS code
+# VS Code
 .vscode/
 
-# Author trashs
-Rotin_GIT.txt
+# JetBrains
+.idea/
 
+# Linux
+*~
+*.swp
+
+# Environment Variables
+.env
+
+# Logs
+*.log
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# SQLAlchemy
+*.db-journal
+
+# Build
+dist/
+build/
