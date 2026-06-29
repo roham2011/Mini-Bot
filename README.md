@@ -14,17 +14,19 @@ Python 3.11+
 - save data from users and use in next response (Same as RAG)
 - SQLite database support
 
-## Project Structuremain
-|-mai
-
-├── Global_host.desktop.download
-
-├── Main_Bot.py
-
-├── requirements.txt
-
-└── Set_Webhook.py
-
+## Project Structure
+MINI-PROJS_Private/
+│
+├── Main_Bot.py                # (Flask + Webhook)
+├── Set_Webhook.py             # set WebHook
+├── requirements.txt            
+├── README.md                  # About
+├── .gitignore
+│
+├── Pata_Base/
+   ├── __init__.py
+   ├── database.py            #all functions SQLite
+   └── RAG.db     
 ## Run
 After Clone Repo :
 bash >> python3 Main_Bot.py
