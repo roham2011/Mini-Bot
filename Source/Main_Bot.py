@@ -1,10 +1,11 @@
 from flask import Flask, request
-import requests
-from Pata_Base.crud import save_report
+from sqlalchemy.orm import sessionmaker
+from Pata_Base.crud import save_report , get_all_reports , get_or_save_user
 from Pata_Base.models import User , Report
-from Pata_Base.crud import get_all_reports
-from Set_Webhook import set_webh
-from Pata_Base.db import session
+from Pata_Base.db import engine , SessionLocal
+from utils.Set_Webhook import set_webh
+import requests
+
 app = Flask(__name__)
 
 user_state = {}
@@ -16,7 +17,11 @@ WEBHOOK_URL = "https://da6f1cf34182c1.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
+
 def send_user_panel(user_id: int):
+    """
+    this function sends user panel to the user who send "/start" command 
+    """
     payload = {
     "chat_id": user_id,
     "text": (
@@ -70,19 +75,19 @@ def post_message(payload: dict):
         print(f"Send message error: {exc}")
 
 def send_message(chat_id: int, text: str):
-    """Send a text message."""
+    """this function sends message to user."""
     payload = {
         "chat_id": chat_id,
         "text": text,
     }
     post_message(payload)
 
-def send_start_menu(chat_id: int):
+def send_start_menu(chat_id: int,first_name:str):
     """Send start menu."""
     payload = {
         "chat_id": chat_id,
         "text": (
-            "سلام و خوش آمدید 🌟\n"
+            f"سلام {first_name} و خوش آمدید 🌟\n"
             "به ربات ما خوش آمدید! خوشحالیم که اینجا هستید 😊\n"
             "اگر سوالی دارید، کافی است از ما بپرسید."
         ),
@@ -163,7 +168,9 @@ def send_about(chat_id: int):
     }
 
     post_message(payload)
+
 def send_count_report(user_id : int):
+    """this function sends user-reports to user."""
     count_report = count_reports(user_id)
     payload = {
     "chat_id": user_id,
@@ -250,95 +257,101 @@ def send_last_report(user_id: int):
 @app.route("/webhook", methods=["POST"])
 def webhook():
     """Handle Bale webhook requests."""
+    message = request.get_json(silent=True) or {}
 
-    data = request.get_json(silent=True) or {}
-
-    print("New Data:", data)
+    print("New Data:", message)
 
     text = None
-    user_id = None
+    bale_user_id = None
+    first_name = message["from"].get("first_name")
 
-    if "message" in data:
-        text = data["message"].get("text")
-        user_id = data["message"]["from"]["id"]
+    session = SessionLocal()
+    try:
+        if "message" in message:
+            text = message["message"].get("text")
+            bale_user_id = message["message"]["from"]["id"]
 
-    elif "callback_query" in data:
-        text = data["callback_query"].get("data")
-        user_id = data["callback_query"]["from"]["id"]
+        elif "callback_query" in message:
+            text = message["callback_query"].get("data")
+            bale_user_id = message["callback_query"]["from"]["id"]
 
-    if text is None or user_id is None:
-        return "ok"
+        if text is None or bale_user_id is None:
+            return "ok"
 
-    print("User:", user_id)
-    print("Text:", text)
+        print("User:", bale_user_id)
+        print("Text:", text)
 
-    # Commands
+        # Commands
 
-    if text == "/start":
-        send_start_menu(user_id)
+        if text == "/start":
+            user = User(bale_user_id=bale_user_id , first_name=first_name)
+            get_or_save_user(session=session , user_id=user.bale_user_id , first_name=user.first_name)
+            
+            send_start_menu(bale_user_id,first_name)
 
-        return "ok"
+            return "ok"
 
-    elif text == "/help":
-        send_help(user_id)
+        elif text == "/help":
+            send_help(bale_user_id)
 
-        return "ok"
+            return "ok"
 
-    elif text == "/About":
-        send_about(user_id)
+        elif text == "/About":
+            send_about(bale_user_id)
 
-        return "ok" 
-    
-    elif text == "/UserPanel":
-        send_user_panel(user_id)
-
-        return "ok"
-    
-    elif text == "/LastReport":
-        send_last_report(user_id)
-
-        return "ok"
-    
-    elif text == "/CountReport":
-        send_count_report(user_id)
-
-        return "ok"
-    
-    elif text == "/ChatMode":
-        user_state[user_id] = "Chat"
-        send_message(user_id, "به حالت گفت و گو با هوش مصنویی وارد شدید!")
-
-        return "ok"
-
-    elif text == "/Report":
-        user_state[user_id] = "Report"
-        send_message(user_id, "گزارش خود را ارسال کنید.")
-
-        return "ok"
-
-    elif text == "/Exit":
-        user_state[user_id] = "Normal"
-        send_message(user_id, "از حالت گفتگو خارج شدید.")
-    
-        return "ok"
-
-    # Report Mode
-
-    if user_state.get(user_id) == "Report":
-        save_report(session = session ,user_id = user_id,text = text)
-        send_message(user_id, "✅ گزارش شما ثبت شد.")
+            return "ok" 
         
-        user_state[user_id] = "Normal"
+        elif text == "/UserPanel":
+            send_user_panel(bale_user_id)
 
-        return "ok"
+            return "ok"
+        
+        elif text == "/LastReport":
+            send_last_report(bale_user_id)
 
-    # Chat Mode
+            return "ok"
+        
+        elif text == "/CountReport":
+            send_count_report(bale_user_id)
 
-    if user_state.get(user_id) == "Chat":
-        answer = ask_llm(text)
-        send_message(user_id, answer)
+            return "ok"
+        
+        elif text == "/ChatMode":
+            user_state[bale_user_id] = "Chat"
+            send_message(bale_user_id, "به حالت گفت و گو با هوش مصنویی وارد شدید!")
 
-        return "ok"
+            return "ok"
+
+        elif text == "/Report":
+            user_state[bale_user_id] = "Report"
+            send_message(bale_user_id, "گزارش خود را ارسال کنید.")
+
+            return "ok"
+
+        elif text == "/Exit":
+            user_state[bale_user_id] = "Normal"
+            send_message(bale_user_id, "از حالت گفتگو خارج شدید.")
+        
+            return "ok"
+
+        # Report Mode
+        if user_state.get(bale_user_id) == "Report":
+            save_report(session = session ,user_id = bale_user_id,text = text)
+            send_message(bale_user_id, "✅ گزارش شما ثبت شد.")
+            
+            user_state[bale_user_id] = "Normal"
+
+            return "ok"
+
+        # Chat Mode
+
+        if user_state.get(bale_user_id) == "Chat":
+            answer = ask_llm(text)
+            send_message(bale_user_id, answer)
+
+            return "ok"
+    finally:
+        session.close()
 
     return "ok"
 

@@ -2,6 +2,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped , mapped_column
 from sqlalchemy import ForeignKey 
 from db import engine
+
 class Base(DeclarativeBase):
     pass
 
@@ -10,9 +11,11 @@ class User(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True)
 
-    user_id : Mapped[int] = mapped_column(unique=True)
+    bale_user_id : Mapped[int] = mapped_column(unique=True)
 
     first_name : Mapped[str | None] = mapped_column()
+    
+    report_count: Mapped[int] = mapped_column(default=0)
     
 class Report(Base):
     __tablename__= "reports"

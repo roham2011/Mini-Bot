@@ -4,4 +4,3 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine("sqlite:///RAG.db")
 
 SessionLocal = sessionmaker(bind=engine)
-session = SessionLocal()
