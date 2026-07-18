@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped , mapped_column
 from sqlalchemy import ForeignKey 
-from db import engine
+from .db import engine
 
 class Base(DeclarativeBase):
     pass

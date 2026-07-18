@@ -1,5 +1,4 @@
 from flask import Flask, request
-from sqlalchemy.orm import sessionmaker
 from Pata_Base.crud import save_report , get_all_reports , get_or_save_user
 from Pata_Base.models import User , Report
 from Pata_Base.db import engine , SessionLocal
@@ -13,7 +12,7 @@ user_state = {}
 TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 URL = f"https://tapi.bale.ai/bot{TOKEN}/sendMessage"
 
-WEBHOOK_URL = "https://da6f1cf34182c1.lhr.life/webhook"
+WEBHOOK_URL = "https://8df56a33bf26de.lhr.life/webhook"
 
 set_webh(WEBHOOK_URL)
 
@@ -263,17 +262,19 @@ def webhook():
 
     text = None
     bale_user_id = None
-    first_name = message["from"].get("first_name")
+    first_name = None
 
     session = SessionLocal()
     try:
         if "message" in message:
             text = message["message"].get("text")
             bale_user_id = message["message"]["from"]["id"]
-
+            first_name = message["message"]["from"].get("first_name")
+        
         elif "callback_query" in message:
             text = message["callback_query"].get("data")
             bale_user_id = message["callback_query"]["from"]["id"]
+            first_name = message["callback_query"]["from"].get("first_name")
 
         if text is None or bale_user_id is None:
             return "ok"
@@ -283,10 +284,11 @@ def webhook():
 
         # Commands
 
-        if text == "/start":
+        if text == "/Start":
             user = User(bale_user_id=bale_user_id , first_name=first_name)
             get_or_save_user(session=session , user_id=user.bale_user_id , first_name=user.first_name)
-            
+            session.commit()
+
             send_start_menu(bale_user_id,first_name)
 
             return "ok"
@@ -337,6 +339,8 @@ def webhook():
         # Report Mode
         if user_state.get(bale_user_id) == "Report":
             save_report(session = session ,user_id = bale_user_id,text = text)
+            session.commit()
+            
             send_message(bale_user_id, "✅ گزارش شما ثبت شد.")
             
             user_state[bale_user_id] = "Normal"
