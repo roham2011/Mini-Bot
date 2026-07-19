@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select 
+from sqlalchemy import select , func
 from .db import engine
 from .models import Report , User
 
@@ -34,18 +34,14 @@ def get_all_reports(session:Session , user_id:str):
     
     return Data
 
-"""SessionLocal = sessionmaker(bind=engine)
-session = SessionLocal()
+def count_reports(session:Session , user_id:str):
+    
+    stmt = select(func.count()).select_from(Report).where(Report.user_id == user_id)
 
-user1 = User(user_id = 93480 , first_name = "Reham")
+    return session.scalar(stmt)
 
-session.add(user1)
-session.commit()
+def get_last_report(session:Session , user_id:str):
 
-report1 = save_report(session = session,user_id = user1.id , text = "Helo")
+    stmt = select(Report).Where(Report.user_id == user_id).order_by(Report.id.desc()).limit(1)
 
-last_rep1 = get_all_reports(session = session,user_id = user1.id)
-
-print (last_rep1)
-
-session.close()"""
+    return session.scalar(stmt)
