@@ -19,3 +19,4 @@ def send_message(chat_id: int, text: str):
         "text": text,
     }
     post_message(payload)
+

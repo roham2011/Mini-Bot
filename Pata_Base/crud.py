@@ -1,21 +1,17 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select , func
-from .db import engine
 from .models import Report , User
 
-def get_or_save_user(session:Session , user_id:str , first_name:str):
-
-    user = User(bale_user_id=user_id , first_name=first_name)
+def get_or_save_user(session, user_id, first_name):
 
     stmt = select(User).where(User.bale_user_id == user_id)
+
     user = session.scalar(stmt)
 
-    if user is None :
-        user = User(bale_user_id=user_id , first_name=first_name)
+    if user is None:
+        user = User(bale_user_id=user_id,first_name=first_name)
         session.add(user)
-    else :
-        return user
-    
+
     return user
 
 def save_report(session:Session , user_id:str , text:str):

@@ -6,6 +6,11 @@ from .db import engine
 class Base(DeclarativeBase):
     pass
 
+class UserState:
+    NORMAL = "Normal"
+    CHAT = "Chat"
+    REPORT = "Report"
+
 class User(Base):
     __tablename__ = "users"
 
@@ -17,6 +22,8 @@ class User(Base):
     
     report_count: Mapped[int] = mapped_column(default=0)
     
+    current_state : Mapped[str] = mapped_column(default=UserState.NORMAL)
+
 class Report(Base):
     __tablename__= "reports"
 
@@ -30,6 +37,3 @@ class Report(Base):
     text : Mapped[str] = mapped_column()
 
 Base.metadata.create_all(engine)
-
-
-
