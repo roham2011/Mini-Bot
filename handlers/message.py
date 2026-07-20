@@ -132,13 +132,12 @@ def send_about(chat_id: int):
 
     post_message(payload)
 
-def send_count_report(session , user_id : int):
+def send_count_report(session , user_id : int , report_count : int):
     """this function sends count of user-reports to user."""
-    count_report = count_reports(session=session , user_id=user_id)
     payload = {
     "chat_id": user_id,
     "text": (
-        f" تعداد گزارشات شما [{count_report}] بود .\n"
+        f" تعداد گزارشات شما [{report_count}] بود .\n"
         "اگر سوالی دارید، کافی است از ما بپرسید."
     ),
     "reply_markup": {

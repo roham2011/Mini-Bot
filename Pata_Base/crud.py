@@ -30,12 +30,6 @@ def get_all_reports(session:Session , user_id:str):
     
     return Data
 
-def count_reports(session:Session , user_id:str):
-    
-    stmt = select(func.count()).select_from(Report).where(Report.user_id == user_id)
-
-    return session.scalar(stmt)
-
 def get_last_report(session:Session , user_id:str):
 
     stmt = select(Report).Where(Report.user_id == user_id).order_by(Report.id.desc()).limit(1)

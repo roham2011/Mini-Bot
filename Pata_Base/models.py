@@ -2,14 +2,24 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped , mapped_column
 from sqlalchemy import ForeignKey 
 from .db import engine
+from datetime import datetime
 
 class Base(DeclarativeBase):
     pass
 
+class ReportPriority:
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+    CRITICAL = "Critical"
+
 class UserState:
     NORMAL = "Normal"
     CHAT = "Chat"
-    REPORT = "Report"
+    REPORT_DESCRIPTION = "ReportDescription"
+    REPORT_TITLE = "ReportTitle"
+    REPORT_CATEGORY = "ReportCategory"
+    REPORT_PRIORITY = "ReportPriority"
 
 class User(Base):
     __tablename__ = "users"
@@ -28,12 +38,21 @@ class Report(Base):
     __tablename__= "reports"
 
     def __repr__(self):
-        return f"<Report {self.id}: {self.text}>"
+        return (
+            f"<Report(id={self.id}, "
+            f"title={self.title!r})>"
+        )
 
     id : Mapped[int] = mapped_column(primary_key=True)
 
     user_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    text : Mapped[str] = mapped_column()
+    title : Mapped[str] = mapped_column()
+
+    description : Mapped[str] = mapped_column()
+
+    priority : Mapped[str] = mapped_column(default=ReportPriority.MEDIUM)
+    
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
 Base.metadata.create_all(engine)

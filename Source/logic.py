@@ -38,7 +38,7 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
         return "ok"
     
     if text == "/CountReport":
-        send_count_report(user.bale_user_id)
+        send_count_report(user.bale_user_id , user.report_count)
 
         return "ok"
     
@@ -51,7 +51,7 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
         return "ok"
 
     if text == "/Report":
-        user.current_state = UserState.REPORT
+        user.current_state = UserState.REPORT_DESCRIPTION
         session.commit()
 
         send_message(user.bale_user_id, "گزارش خود را ارسال کنید.")
@@ -67,15 +67,15 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
         return "ok"
 
     # Report Mode
-    if user.current_state == UserState.REPORT :
+    if user.current_state == UserState.REPORT_DESCRIPTION :
         save_report(session = session ,user_id = user.bale_user_id,text = text)
-        session.commit()
-        
+        user.report_count += 1
+
         send_message(user.bale_user_id, "✅ گزارش شما ثبت شد.")
         
         user.current_state = UserState.NORMAL
         session.commit()
-        
+
         return "ok"
 
     # Chat Mode
