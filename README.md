@@ -14,32 +14,15 @@ Python 3.11+
 - save data from users and use in next response (Same as RAG)
 - SQLite database support
 
-## Project Structure
+## Project Struct
 ```text
-MINI-PROJS_Private/
-│
-├── Main_Bot.py              # Flask + Webhook
-├── Set_Webhook.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-│
-├── database/
-│   ├── __init__.py
-│   ├── db.py                # Connect to DB
-│   ├── models.py            # Class tables
-│   ├── crud.py              # DB statment
-│   └── RAG.db
-│
-├── handlers/
-│   ├── __init__.py
-│   ├── report.py
-│   └── chat.py
-│
-└── utils/
-    ├── __init__.py
-    └── send_message.py
-```   
+```
+```
+```
+```
+```
+
+
 ## Run
 After Clone Repo :
 bash >> python3 Main_Bot.py

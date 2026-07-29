@@ -1,5 +1,5 @@
 from utils.send_message import post_message
-from Pata_Base.crud import count_reports , get_last_report 
+from Pata_Base.crud import  get_last_report 
 
 def send_user_panel(user_id: int):
     """
@@ -132,8 +132,9 @@ def send_about(chat_id: int):
 
     post_message(payload)
 
-def send_count_report(session , user_id : int , report_count : int):
+def send_count_report(user_id : int , report_count : int):
     """this function sends count of user-reports to user."""
+    print("send Count")
     payload = {
     "chat_id": user_id,
     "text": (

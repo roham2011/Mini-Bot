@@ -9,11 +9,15 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
      
     user = get_or_save_user(session=session , user_id=bale_user_id , first_name=first_name)
 
+    print("HANDLE:", text)
+    print("STATE:", user.current_state)
     if text == "/Start":
         
         session.commit()
 
         send_start_menu(user.bale_user_id , user.first_name)
+
+        print("START MENU SENT")
 
         return "ok"
 
@@ -37,7 +41,7 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
 
         return "ok"
     
-    if text == "/CountReport":
+    if text == "/CountReports":
         send_count_report(user.bale_user_id , user.report_count)
 
         return "ok"

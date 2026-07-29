@@ -2,11 +2,11 @@ from flask import Flask, request
 from .logic import handle_messages
 from utils.Set_Webhook import set_webh
 from Pata_Base.db import SessionLocal
-from config import WEBHOOK_URL
+from config import Webhook_URL
 
 app = Flask(__name__)
 
-set_webh(WEBHOOK_URL)
+set_webh(Webhook_URL)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -47,6 +47,7 @@ def webhook():
         except Exception :
             session.rollback()
             raise
+    return "OK", 200
 
 @app.route("/test/<name>")
 def test_webhook(name: str):
@@ -55,4 +56,4 @@ def test_webhook(name: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True,port=5005,)
+   app.run(host="127.0.0.1", port=5006, debug=True)
