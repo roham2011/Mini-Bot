@@ -1,7 +1,7 @@
 from flask import Flask, request
 from .logic import handle_messages
 from utils.Set_Webhook import set_webh
-from Pata_Base.db import SessionLocal
+from database.db import SessionLocal
 from config import Webhook_URL
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ set_webh(Webhook_URL)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    """Handle Bale webhook requests."""
+    """this function Handle Bale webhook requests."""
     update = request.get_json(silent=True) or {}
 
     print("New Data:", update)
@@ -39,7 +39,7 @@ def webhook():
         try:
             handle_messages(
             session=session,
-            text=text,
+            command=text,
             bale_user_id=bale_user_id,
             first_name=first_name,
         )
