@@ -2,7 +2,7 @@ from flask import Flask, request
 from .logic import handle_messages
 from utils.Set_Webhook import set_webh
 from database.db import SessionLocal
-from config import Webhook_URL
+from config import Webhook_URL , DEBUG , PORT
 
 app = Flask(__name__)
 
@@ -56,4 +56,4 @@ def test_webhook(name: str):
 
 
 if __name__ == "__main__":
-   app.run(host="127.0.0.1", port=5006, debug=True)
+   app.run(host="127.0.0.1", port=PORT, debug=DEBUG)

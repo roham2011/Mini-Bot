@@ -14,3 +14,10 @@ Webhook_URL = f"{Global_URL}/webhook"
 
 # Data base URL
 DATABASE_URL = "sqlite:///database/RAG.db"
+
+# state of debug mode in falsk
+DEBUG = True
+
+# ip port in flask 
+PORT = 5006
+

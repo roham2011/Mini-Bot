@@ -3,23 +3,10 @@ from sqlalchemy.orm import Mapped , mapped_column
 from sqlalchemy import ForeignKey 
 from .db import engine
 from datetime import datetime
+from core.enums import ReportPriority , UserState
 
 class Base(DeclarativeBase):
     pass
-
-class ReportPriority:
-    LOW = "Low"
-    MEDIUM = "Medium"
-    HIGH = "High"
-    CRITICAL = "Critical"
-
-class UserState:
-    NORMAL = "Normal"
-    CHAT = "Chat"
-    REPORT_DESCRIPTION = "ReportDescription"
-    REPORT_TITLE = "ReportTitle"
-    REPORT_CATEGORY = "ReportCategory"
-    REPORT_PRIORITY = "ReportPriority"
 
 class User(Base):
     __tablename__ = "users"
