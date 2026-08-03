@@ -19,7 +19,7 @@ class User(Base):
     
     report_count: Mapped[int] = mapped_column(default=0)
     
-    current_state : Mapped[str] = mapped_column(default=UserState.NORMAL)
+    current_state: Mapped[str] = mapped_column(default=UserState.NORMAL)
 
 class Report(Base):
     __tablename__= "reports"

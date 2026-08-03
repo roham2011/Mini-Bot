@@ -4,6 +4,7 @@ from handlers.rag.chat import ask_llm
 from utils.send_message import send_message
 from database.crud import  save_report , get_or_save_user
 from database.models import UserState
+from .constants import Commands
 
 def handle_messages(session , text:str , bale_user_id:str , first_name:str):
     '''this function returns None and it handels user command'''
@@ -13,9 +14,9 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
     print("HANDLE:", text)
     print("STATE:", user.current_state)
 
-    command = text.lower()
+    command = text.strip().lower()
 
-    if command == "/start":
+    if command == Commands.START:
         
         session.commit()
 
@@ -25,32 +26,32 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
 
         return "ok"
 
-    if command == "/help":
+    if command == Commands.HELP:
         send_help(user.bale_user_id)
 
         return "ok"
 
-    if command == "/about":
+    if command == Commands.ABOUT:
         send_about(user.bale_user_id)
 
         return "ok" 
     
-    if command == "/user_panel":
+    if command == Commands.USER_PANEL:
         send_user_panel(user.bale_user_id)
 
         return "ok"
     
-    if command == "/last_report":
+    if command == Commands.LAST_REPORT:
         send_last_report(user.bale_user_id)
 
         return "ok"
     
-    if command == "/count_reports":
+    if command == Commands.COUNT_REPORT:
         send_count_report(user.bale_user_id , user.report_count)
 
         return "ok"
     
-    if command == "/chat_mode":
+    if command == Commands.CHAT_MODE:
         user.current_state = UserState.CHAT
         session.commit()
 
@@ -58,7 +59,7 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
 
         return "ok"
 
-    if command == "/report":
+    if command == Commands.REPORT:
         user.current_state = UserState.REPORT_DESCRIPTION
         session.commit()
 
@@ -66,25 +67,13 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
 
         return "ok"
 
-    if command == "/exit":
+    if command == Commands.EXIT:
         user.current_state = UserState.NORMAL
         session.commit()
 
         send_message(user.bale_user_id, "از حالت گفتگو خارج شدید.")
     
         return "ok"
-
-    '''    # Report Mode
-        if user.current_state == UserState.REPORT_DESCRIPTION :
-            save_report(session = session ,user_id = user.bale_user_id,text = text)
-            user.report_count += 1
-
-            send_message(user.bale_user_id, "✅ گزارش شما ثبت شد.")
-            
-            user.current_state = UserState.NORMAL
-            session.commit()
-
-            return "ok"'''
 
     # Chat Mode
     if user.current_state == UserState.CHAT :

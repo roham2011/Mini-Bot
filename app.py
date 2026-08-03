@@ -1,5 +1,5 @@
 from flask import Flask, request
-from .logic import handle_messages
+from core.logic import handle_messages
 from utils.Set_Webhook import set_webh
 from database.db import SessionLocal
 from config import Webhook_URL , DEBUG , PORT
@@ -39,7 +39,7 @@ def webhook():
         try:
             handle_messages(
             session=session,
-            command=text,
+            text=text,
             bale_user_id=bale_user_id,
             first_name=first_name,
         )
