@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from .db import engine
 from datetime import datetime
 from core.enums import ReportPriority , UserState
+from sqlalchemy import Enum as SQLEnum
 
 class Base(DeclarativeBase):
     pass
@@ -19,7 +20,7 @@ class User(Base):
     
     report_count: Mapped[int] = mapped_column(default=0)
     
-    current_state: Mapped[str] = mapped_column(default=UserState.NORMAL)
+    current_state: Mapped[UserState] = mapped_column(SQLEnum(UserState),default=UserState.NORMAL)
 
 class Report(Base):
     __tablename__= "reports"
@@ -38,7 +39,7 @@ class Report(Base):
 
     description : Mapped[str] = mapped_column()
 
-    priority : Mapped[str] = mapped_column(default=ReportPriority.MEDIUM)
+    priority : Mapped[ReportPriority] = mapped_column(SQLEnum(ReportPriority),default=ReportPriority.UNKNOWN)
     
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 

@@ -1,7 +1,15 @@
-from database.models import UserState
-from core.enums import step_resualts
+from core.enums import UserState, StepResult
 from sqlalchemy.orm import Session
+from core.constants import Commands
+def process_report_step(text:str , session : Session, user:object):
 
-def process_report_step(text:str , session : Session, ):
+# define report Conditions here  
+  
+    if user.current_state == UserState.REPORT_TITLE :
 
-    return step_resualts()
+        return StepResult(
+            message="عنوان گزارش خویش را وارد کن فرزندم!",
+            next_state= UserState.REPORT_TITLE,
+            finished= True
+        )
+        

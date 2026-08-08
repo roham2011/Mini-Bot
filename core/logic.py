@@ -1,6 +1,8 @@
 # include requirement 
-from handlers.message import send_about , send_help , send_start_menu , send_user_panel , send_count_report , send_last_report
+from handlers.message import send_about, send_help, send_start_menu, send_user_panel, send_last_report, send_report_count
+from database.crud import get_last_report
 from handlers.rag.chat import ask_llm
+from handlers.rag.report import process_report_step
 from utils.send_message import send_message
 from database.crud import  save_report , get_or_save_user
 from database.models import UserState
@@ -42,12 +44,14 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
         return "ok"
     
     if command == Commands.LAST_REPORT:
-        send_last_report(user.bale_user_id)
+        report = get_last_report(session, user.id)
+
+        send_last_report(user_id=user.bale_user_id,report=report,)
 
         return "ok"
     
     if command == Commands.COUNT_REPORT:
-        send_count_report(user.bale_user_id , user.report_count)
+        send_report_count(user_id=user.bale_user_id,report_count=user.report_count,)
 
         return "ok"
     
@@ -58,14 +62,13 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
         send_message(user.bale_user_id, "به حالت گفت و گو با هوش مصنویی وارد شدید!")
 
         return "ok"
-
+    
     if command == Commands.REPORT:
-        user.current_state = UserState.REPORT_DESCRIPTION
+
+        user.current_state = UserState.REPORT_TITLE
         session.commit()
 
-        send_message(user.bale_user_id, "گزارش خود را ارسال کنید.")
-
-        return "ok"
+        send_message(chat_id=user.bale_user_id,text="به حالت گزارش وارد شدید .\n عنوان گزارش را وارد کنید.")
 
     if command == Commands.EXIT:
         user.current_state = UserState.NORMAL
@@ -75,7 +78,17 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
     
         return "ok"
 
-    # Chat Mode
+    if user.current_state.is_report():
+        
+        result = process_report_step(
+            session=session,
+            user=user,
+            text=text,
+        )
+        session.commit()
+        send_message(chat_id=user.bale_user_id,text=result.message)
+
+    # Chat-Mode
     if user.current_state == UserState.CHAT :
         answer = ask_llm(command)
         send_message(user.bale_user_id, answer)

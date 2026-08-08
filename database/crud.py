@@ -32,6 +32,6 @@ def get_all_reports(session:Session , user_id:str):
 
 def get_last_report(session:Session , user_id:str):
 
-    stmt = select(Report).Where(Report.user_id == user_id).order_by(Report.id.desc()).limit(1)
+    stmt = select(Report).where(Report.user_id == user_id).order_by(Report.id.desc()).limit(1)
 
     return session.scalar(stmt)
