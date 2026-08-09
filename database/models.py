@@ -1,9 +1,9 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped , mapped_column
+from sqlalchemy.orm import Mapped , mapped_column , relationship
 from sqlalchemy import ForeignKey 
 from .db import engine
 from datetime import datetime
-from core.enums import ReportPriority , UserState
+from core.enums import ReportPriority , Category ,UserState
 from sqlalchemy import Enum as SQLEnum
 
 class Base(DeclarativeBase):
@@ -18,9 +18,12 @@ class User(Base):
 
     first_name : Mapped[str | None] = mapped_column()
     
-    report_count: Mapped[int] = mapped_column(default=0)
+    report_count : Mapped[int] = mapped_column(default=0)
     
-    current_state: Mapped[UserState] = mapped_column(SQLEnum(UserState),default=UserState.NORMAL)
+    current_state : Mapped[UserState] = mapped_column(SQLEnum(UserState),default=UserState.NORMAL)
+
+    report : Mapped[list["Report"]] = relationship(back_populates="user")
+
 
 class Report(Base):
     __tablename__= "reports"
@@ -39,8 +42,28 @@ class Report(Base):
 
     description : Mapped[str] = mapped_column()
 
+    category : Mapped[Category] = mapped_column(SQLEnum(Category),default=Category.OTHER)
+
     priority : Mapped[ReportPriority] = mapped_column(SQLEnum(ReportPriority),default=ReportPriority.UNKNOWN)
     
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at : Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
+    user : Mapped["User"] = relationship(back_populates="report")
+
+
+class ReportDraft(Base):
+    __tablename__ = "report_drafts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    title : Mapped[str | None] = mapped_column()
+
+    category : Mapped[Category | None] = mapped_column(SQLEnum(Category))
+
+    description : Mapped[str | None] = mapped_column()
+
+    priority : Mapped[ReportPriority | None] = mapped_column(SQLEnum(ReportPriority))
+    
 Base.metadata.create_all(engine)

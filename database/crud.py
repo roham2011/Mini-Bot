@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select , func
-from .models import Report , User
+from .models import Report , User , ReportDraft
 
-def get_or_save_user(session, user_id, first_name):
+def get_or_save_user(session:Session, user_id:int, first_name:str):
 
     stmt = select(User).where(User.bale_user_id == user_id)
 
@@ -14,15 +14,22 @@ def get_or_save_user(session, user_id, first_name):
 
     return user
 
-def save_report(session:Session , user_id:str , text:str):
+def save_report(session:Session , user_id:int , text:str):
 
     report = Report(user_id=user_id , text=text)
 
     session.add(report)
 
     return report
+def get_report_draft(session:Session , user_id:int):
 
-def get_all_reports(session:Session , user_id:str):
+    stmt = select(ReportDraft).where(ReportDraft.user_id == user_id)
+
+    draft = session.scalar(stmt)
+
+    return draft
+
+def get_all_reports(session:Session , user_id:int):
     
     stmt = select(Report).where(Report.user_id == user_id)
 
@@ -30,7 +37,7 @@ def get_all_reports(session:Session , user_id:str):
     
     return Data
 
-def get_last_report(session:Session , user_id:str):
+def get_last_report(session:Session , user_id:int):
 
     stmt = select(Report).where(Report.user_id == user_id).order_by(Report.id.desc()).limit(1)
 

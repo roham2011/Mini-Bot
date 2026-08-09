@@ -7,8 +7,14 @@ class ReportPriority(Enum):
     MEDIUM = "Medium"
     HIGH = "High"
     CRITICAL = "Critical"
-
+    # when user does not enter the priority
     UNKNOWN = "Unknown"
+
+class Category(Enum):
+    EXPERIENCE = "Experience"
+    BREAKDOWN = "Breakdown"
+    IDEA = "Idea"
+    OTHER = "Other"
     
 # all User_stats
 class UserState(Enum):

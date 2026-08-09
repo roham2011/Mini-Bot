@@ -5,7 +5,7 @@ from handlers.rag.chat import ask_llm
 from handlers.rag.report import process_report_step
 from utils.send_message import send_message
 from database.crud import  save_report , get_or_save_user
-from database.models import UserState
+from database.models import UserState , ReportDraft
 from .constants import Commands
 
 def handle_messages(session , text:str , bale_user_id:str , first_name:str):
@@ -46,12 +46,12 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
     if command == Commands.LAST_REPORT:
         report = get_last_report(session, user.id)
 
-        send_last_report(user_id=user.bale_user_id,report=report,)
+        send_last_report(user_id=user.bale_user_id,report=report)
 
         return "ok"
-    
+         
     if command == Commands.COUNT_REPORT:
-        send_report_count(user_id=user.bale_user_id,report_count=user.report_count,)
+        send_report_count(user_id=user.bale_user_id,report_count=user.report_count)
 
         return "ok"
     
@@ -66,9 +66,11 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
     if command == Commands.REPORT:
 
         user.current_state = UserState.REPORT_TITLE
+        draft = ReportDraft()
+        session.add(draft)
         session.commit()
 
-        send_message(chat_id=user.bale_user_id,text="به حالت گزارش وارد شدید .\n عنوان گزارش را وارد کنید.")
+        send_message(chat_id=user.bale_user_id,text="به حالت گزارش وارد شدید .")
 
     if command == Commands.EXIT:
         user.current_state = UserState.NORMAL
@@ -86,6 +88,7 @@ def handle_messages(session , text:str , bale_user_id:str , first_name:str):
             text=text,
         )
         session.commit()
+
         send_message(chat_id=user.bale_user_id,text=result.message)
 
     # Chat-Mode
