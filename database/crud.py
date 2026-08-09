@@ -14,13 +14,6 @@ def get_or_save_user(session:Session, user_id:int, first_name:str):
 
     return user
 
-def save_report(session:Session , user_id:int , text:str):
-
-    report = Report(user_id=user_id , text=text)
-
-    session.add(report)
-
-    return report
 def get_report_draft(session:Session , user_id:int):
 
     stmt = select(ReportDraft).where(ReportDraft.user_id == user_id)
@@ -28,6 +21,21 @@ def get_report_draft(session:Session , user_id:int):
     draft = session.scalar(stmt)
 
     return draft
+
+def creat_report_from_draft(session:Session , draft:ReportDraft):
+
+    report = Report(
+                    user_id = draft.user_id,
+                    title = draft.title,
+                    priority = draft.priority,
+                    category = draft.category,
+                    description = draft.description
+                    )
+    
+    session.add(report)
+    session.delete(draft)
+
+    return report
 
 def get_all_reports(session:Session , user_id:int):
     

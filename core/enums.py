@@ -37,5 +37,6 @@ class UserState(Enum):
 @dataclass(slots=True)
 class StepResult():
     message : str
-    next_state : str
+    next_state : UserState
     finished : bool = True 
+    keyboard : list | None = None 

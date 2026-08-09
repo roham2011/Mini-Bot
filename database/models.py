@@ -53,7 +53,13 @@ class Report(Base):
 
 class ReportDraft(Base):
     __tablename__ = "report_drafts"
-
+    def __repr__(self):
+        return (f"<draft Report\n- (user_id={self.user_id})\n"
+                f"- (title={self.title})\n"
+                f"- (category={self.category})\n"
+                f"- (priority={self.priority})\n"
+                f"- (description={self.description})>")
+    
     id: Mapped[int] = mapped_column(primary_key=True)
 
     user_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
