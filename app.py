@@ -49,7 +49,7 @@ def webhook():
             raise
     return "OK", 200
 
-@app.route()
+@app.route(TEST_ROUTE)
 def test_webhook(name: str):
     """Test route."""
     return f"Hello {name}, webhook is OK!"

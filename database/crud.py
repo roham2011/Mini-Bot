@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select , func
-from .models import Report , User , ReportDraft
+from .models import Report , User , ReportDraft ,  ExperienceDraft
 
 def get_or_save_user(session:Session, user_id:int, first_name:str):
 
@@ -17,6 +17,14 @@ def get_or_save_user(session:Session, user_id:int, first_name:str):
 def get_report_draft(session:Session , user_id:int):
 
     stmt = select(ReportDraft).where(ReportDraft.user_id == user_id)
+
+    draft = session.scalar(stmt)
+
+    return draft
+
+def get_exper_draft(session:Session , user_id:int):
+
+    stmt = select(ExperienceDraft).where(ExperienceDraft.user_id == user_id)
 
     draft = session.scalar(stmt)
 

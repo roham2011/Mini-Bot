@@ -16,7 +16,7 @@ def post_message(payload):
     print("Bale Response:")
     print(response.text)
 
-    return response
+    return response 
 
 def send_message(chat_id: int, text: str):
     """this function sends message to user."""

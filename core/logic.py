@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from handlers.message import send_about, send_help, send_start_menu, send_user_panel, send_last_report, send_report_count
 from database.crud import get_last_report
 from handlers.rag.chat import ask_llm
-from handlers.rag.report import process_report_step
+from handlers.rag.report import process_report_or_exper
 from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
-from database.models import UserState , ReportDraft
+from database.models import UserState , ReportDraft , ExperienceDraft
 from .constants import Commands
-
+from .enums import ExperienceCategory
 def handle_messages(session:Session , text:str , bale_user_id:str , first_name:str):
     """this function returns None and it handels user command
 
@@ -35,7 +35,7 @@ def handle_messages(session:Session , text:str , bale_user_id:str , first_name:s
         if command == Commands.START:
             
             session.commit()
-
+            user.current_state = UserState.NORMAL
             send_start_menu(user.bale_user_id , user.first_name)
 
             print("START MENU SENT")
@@ -78,21 +78,46 @@ def handle_messages(session:Session , text:str , bale_user_id:str , first_name:s
             return "ok"
         
         if command == Commands.REPORT:
-            user.current_state = UserState.REPORT_TITLE
-            draft =  ReportDraft()
-            draft.user_id = user.id
-            print(draft)
 
+            payload = {
+                "chat_id": user.bale_user_id,
+                "text": (
+                        "قصد ثبت گزارش دارید یا تجربه ؟\n"
+                        "یکی از گزینه‌های زیر را انتخاب کنید."
+                ),
+                "reply_markup": {
+                "inline_keyboard": [
+                    [{"text": "ثبت تجربه", "callback_data": UserState.EXPERIENCE.value}],
+                    [{"text": "ثبت گزارش", "callback_data": UserState.REPORT.value}]
+                ]
+                },
+            }
+
+            post_message(payload)
+            return "ok" 
+        
+        if text == UserState.REPORT.value:
+            user.current_state = UserState.REPORT
+            draft = ReportDraft()
+            draft.user_id = user.id
             session.add(draft)
             session.commit()
 
-            send_message(
-                user.bale_user_id,
-                "به بخش ثبت گزارش خوش آمدید.\nعنوان گزارش را وارد کنید:"
-            )
+            send_message(user.bale_user_id,"عنوان گزارش خود را وارد کنید:")
 
-            return "ok" 
-        
+            return "ok"
+
+        if text == UserState.EXPERIENCE.value:
+            user.current_state = UserState.EXPERIENCE
+            draft = ExperienceDraft()
+            draft.user_id = user.id
+            session.add(draft)
+            session.commit()
+
+            send_message(user.bale_user_id, "عنوان تجربه خود را وارد کنید:")
+
+            return "ok"
+    
         if command == Commands.EXIT:
             user.current_state = UserState.NORMAL
             session.commit()
@@ -101,9 +126,9 @@ def handle_messages(session:Session , text:str , bale_user_id:str , first_name:s
         
             return "ok"
 
-        if user.current_state.is_report():
-            
-            result = process_report_step(
+        if user.current_state.not_normal_or_chat():
+            user.current_state = text
+            result = process_report_or_exper(
                 session=session,
                 user=user,
                 text=text,

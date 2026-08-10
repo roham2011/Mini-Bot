@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped , mapped_column , relationship
 from sqlalchemy import ForeignKey 
 from .db import engine
 from datetime import datetime
-from core.enums import ReportPriority , Category ,UserState
+from core.enums import ReportPriority , ReportCategory ,UserState
 from sqlalchemy import Enum as SQLEnum
 
 class Base(DeclarativeBase):
@@ -24,6 +24,7 @@ class User(Base):
 
     report : Mapped[list["Report"]] = relationship(back_populates="user")
 
+    experience : Mapped[list["Experience"]] = relationship(back_populates="user")
 
 class Report(Base):
     __tablename__= "reports"
@@ -42,7 +43,7 @@ class Report(Base):
 
     description : Mapped[str] = mapped_column()
 
-    category : Mapped[Category] = mapped_column(SQLEnum(Category),default=Category.OTHER)
+    category : Mapped[ReportCategory] = mapped_column(SQLEnum(ReportCategory),default=ReportCategory.OTHER)
 
     priority : Mapped[ReportPriority] = mapped_column(SQLEnum(ReportPriority),default=ReportPriority.UNKNOWN)
     
@@ -53,6 +54,7 @@ class Report(Base):
 
 class ReportDraft(Base):
     __tablename__ = "report_drafts"
+
     def __repr__(self):
         return (f"<draft Report\n- (user_id={self.user_id})\n"
                 f"- (title={self.title})\n"
@@ -66,7 +68,46 @@ class ReportDraft(Base):
 
     title : Mapped[str | None] = mapped_column()
 
-    category : Mapped[Category | None] = mapped_column(SQLEnum(Category))
+    category : Mapped[ReportCategory | None] = mapped_column(SQLEnum(ReportCategory))
+
+    description : Mapped[str | None] = mapped_column()
+
+    priority : Mapped[ReportPriority | None] = mapped_column(SQLEnum(ReportPriority))
+
+class Experience(Base):
+    __tablename__ = "experiences"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id : Mapped[int] = mapped_column(ForeignKey("users.id")) 
+
+    title : Mapped[str] = mapped_column()
+    
+    description : Mapped[str] = mapped_column()
+    
+    category : Mapped[ReportCategory] = mapped_column(SQLEnum(ReportCategory),default=ReportCategory.OTHER)
+
+    created_at : Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    user : Mapped["User"] = relationship(back_populates="experience")
+
+class ExperienceDraft(Base):
+    __tablename__= "experience_drafts"
+
+    def __repr__(self):
+        return (f"<draft Report\n- (user_id={self.user_id})\n"
+                f"- (title={self.title})\n"
+                f"- (category={self.category})\n"
+                f"- (priority={self.priority})\n"
+                f"- (description={self.description})>")
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    title : Mapped[str | None] = mapped_column()
+
+    category : Mapped[ReportCategory | None] = mapped_column(SQLEnum(ReportCategory))
 
     description : Mapped[str | None] = mapped_column()
 
