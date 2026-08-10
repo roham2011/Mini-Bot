@@ -25,12 +25,12 @@ def get_report_draft(session:Session , user_id:int):
 def creat_report_from_draft(session:Session , draft:ReportDraft):
 
     report = Report(
-                    user_id = draft.user_id,
-                    title = draft.title,
-                    priority = draft.priority,
-                    category = draft.category,
-                    description = draft.description
-                    )
+        user_id = draft.user_id,
+        title = draft.title,
+        priority = draft.priority,
+        category = draft.category,
+        description = draft.description
+        )
     
     session.add(report)
     session.delete(draft)

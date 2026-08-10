@@ -2,13 +2,13 @@ from flask import Flask, request
 from core.logic import handle_messages
 from utils.Set_Webhook import set_webh
 from database.db import SessionLocal
-from config import Webhook_URL , DEBUG , PORT
+from config import Webhook_URL , DEBUG , PORT , MAIN_ROUTE , TEST_ROUTE , HOST
 
 app = Flask(__name__)
 
 set_webh(Webhook_URL)
 
-@app.route("/webhook", methods=["POST"])
+@app.route(MAIN_ROUTE, methods=["POST"])
 def webhook():
     """this function Handle Bale webhook requests."""
     update = request.get_json(silent=True) or {}
@@ -49,11 +49,11 @@ def webhook():
             raise
     return "OK", 200
 
-@app.route("/test/<name>")
+@app.route()
 def test_webhook(name: str):
     """Test route."""
     return f"Hello {name}, webhook is OK!"
 
 
 if __name__ == "__main__":
-   app.run(host="127.0.0.1", port=PORT, debug=DEBUG)
+   app.run(host=HOST, port=PORT, debug=DEBUG)
