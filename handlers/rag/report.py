@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database.models import User 
 from database.crud import get_report_draft , creat_report_from_draft
 
-def process_report_or_exper(text:str , session:Session, user:User ):
+def process_report_or_exper(text:str , session:Session, user:User ) -> StepResult :
     """this function processes next step in submit report and submit Experience
 
     Args:

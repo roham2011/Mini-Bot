@@ -31,18 +31,19 @@ class UserState(Enum):
     REPORT_TITLE = "ReportTitle"
 
     # Exprience stats
-    EXPERIENCE = "Eperience"
+    EXPERIENCE = "Experience"
     EXPERIENCE_DESCRIPTION = "EperienceDescription"
     EXPERIENCE_CATEGORY = "ExperienceCategory"
     EXPERIENCE_TITLE = "ExperienceTitle"
 
-    def not_normal_or_chat(self):
+    def is_active(self):
         """ this function retruns true when user wants Submit Report or Experience
 
         Returns: 
             Boolian : True/False
         """
-        return self.value.startswith("Report") or self.value.startswith("Experience")
+
+        return self is not UserState.NORMAL, UserState.CHAT
     
 class ExperienceCategory(Enum):
     INNOVATION = "Innovation"

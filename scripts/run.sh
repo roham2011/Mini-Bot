@@ -7,6 +7,8 @@ source .venv/bin/activate
 
 echo "=== Creating SSH Tunnel ==="
 
+rm runtime/tunnel_url.txt runtime/tunnel.log
+
 ssh -o StrictHostKeyChecking=no \
     -R 80:localhost:5006 \
     localhost.run > runtime/tunnel.log 2>&1 &

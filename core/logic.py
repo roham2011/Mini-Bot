@@ -7,179 +7,254 @@ from handlers.rag.chat import ask_llm
 from handlers.rag.report import process_report_or_exper
 from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
-from database.models import UserState , ReportDraft , ExperienceDraft
+from database.models import UserState , ReportDraft , ExperienceDraft , User
 from .constants import Commands
 from .enums import ExperienceCategory
-def handle_messages(session:Session , text:str , bale_user_id:str , first_name:str):
-    """this function returns None and it handels user command
+# Command Handlers
 
-    Args:
-        session (Session): for manage data
-        text (str): user-input for handle response
-        bale_user_id (str): for post message to user and creat User-object
-        first_name (str): for creat User-object
+def handle_start(session: Session, user: User ,text: str):
+    user.current_state = UserState.NORMAL
 
-    Returns:
-        str(OK): for confirm
-    """    
+    session.commit()
+
+    send_start_menu(user.bale_user_id,user.first_name)
+
+    return "start-ok"
 
 
+def handle_help(session: Session, user: User ,text: str):
+    send_help(user.bale_user_id)
+
+    return "help-ok"
+
+
+def handle_about(session: Session, user: User ,text: str):
+    send_about(user.bale_user_id)
+
+    return "about-ok"
+
+
+def handle_user_panel(session: Session, user: User ,text: str):
+    send_user_panel(user.bale_user_id)
+
+    return "panel-ok"
+
+
+def handle_last_report(session: Session, user: User ,text: str):
+    report = get_last_report(session,user.id)
+
+    send_last_report(user_id=user.bale_user_id,report=report,)
+
+    return "last-report-ok"
+
+
+def handle_report_count(session: Session, user: User ,text: str):
+    send_report_count(user_id=user.bale_user_id,report_count=user.report_count)
+
+    return "report-count-ok"
+
+
+def handle_chat_mode(session: Session, user: User ,text: str):
+    user.current_state = UserState.CHAT
+
+    session.commit()
+
+    send_message(user.bale_user_id,"به حالت گفت‌وگو با هوش مصنوعی وارد شدید!")
+
+    return "chat-ok"
+
+
+def handle_report_command(session: Session, user: User ,text: str):
+    payload = {
+        "chat_id": user.bale_user_id,
+        "text": (
+            "قصد ثبت گزارش دارید یا تجربه؟\n"
+            "یکی از گزینه‌های زیر را انتخاب کنید."
+        ),
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "ثبت تجربه",
+                        "callback_data": UserState.EXPERIENCE_TITLE.value,
+                    }
+                ],
+                [
+                    {
+                        "text": "ثبت گزارش",
+                        "callback_data": UserState.REPORT_TITLE.value,
+                    }
+                ],
+            ]
+        },
+    }
+
+    post_message(payload)
+
+    return "report-menu-ok"
+
+
+def handle_report_start(session: Session, user: User ,text: str):
+    user.current_state = UserState.REPORT_TITLE
+
+    draft = ReportDraft()
+    draft.user_id = user.id
+
+    session.add(draft)
+    session.commit()
+
+    send_message(user.bale_user_id,"عنوان گزارش خود را وارد کنید:")
+
+    return "report-start-ok"
+
+
+def handle_experience_start(session: Session, user: User ,text: str):
+    user.current_state = UserState.EXPERIENCE_TITLE
+
+    draft = ExperienceDraft()
+    draft.user_id = user.id
+
+    session.add(draft)
+    session.commit()
+
+    send_message(user.bale_user_id,"عنوان تجربه خود را وارد کنید:")
+
+    return "experience-start-ok"
+
+
+def handle_exit(session: Session, user: User ,text: str):
+    user.current_state = UserState.NORMAL
+
+    session.commit()
+
+    send_message(user.bale_user_id,"از حالت گفتگو خارج شدید.")
+
+    return "exit-ok"
+
+
+# State Handler
+
+
+def handle_state(session: Session, user: User ,text: str):
+    result = process_report_or_exper(session=session,user=user, text=text)
+
+    user.current_state = result.next_state
+
+    session.commit()
+
+    if result.keyboard is None:
+        send_message(chat_id=user.bale_user_id,text=result.message,)
+
+    else:
+        payload = {
+            "chat_id": user.bale_user_id,
+            "text": result.message,
+            "reply_markup": {
+                "inline_keyboard": result.keyboard,
+            },
+        }
+
+        post_message(payload)
+
+    return "state-ok"
+
+
+def handle_chat(session: Session,user: User,text: str,):
+    answer = ask_llm(text)
+
+    send_message(
+        user.bale_user_id,answer)
+
+    return "chat-message-ok"
+
+
+# Dictionaries
+
+COMMAND_HANDLERS = {
+    Commands.START: handle_start,
+    Commands.HELP: handle_help,
+    Commands.ABOUT: handle_about,
+    Commands.USER_PANEL: handle_user_panel,
+    Commands.LAST_REPORT: handle_last_report,
+    Commands.COUNT_REPORT: handle_report_count,
+    Commands.CHAT_MODE: handle_chat_mode,
+    Commands.REPORT: handle_report_command,
+    Commands.EXIT: handle_exit,
+
+    UserState.REPORT.value: handle_report_start,
+    UserState.EXPERIENCE.value: handle_experience_start,
+}
+
+
+# Main Handler
+
+def command_handler(session: Session,text: str,bale_user_id: str,first_name: str):
     try:
-        user = get_or_save_user(session=session , user_id=bale_user_id , first_name=first_name)
+        user = get_or_save_user(session=session,user_id=bale_user_id,first_name=first_name)
 
         print("HANDLE:", text)
         print("STATE:", user.current_state)
 
         command = text.strip().lower()
 
-        if command == Commands.START:
-            
-            session.commit()
-            user.current_state = UserState.NORMAL
-            send_start_menu(user.bale_user_id , user.first_name)
+        # 1. Commands / callbacks
 
-            print("START MENU SENT")
+        handler = COMMAND_HANDLERS.get(command)
 
-            return "ok"
+        if handler is not None:
+            return handler(session=session,user=user,text=text)
 
-        if command == Commands.HELP:
-            send_help(user.bale_user_id)
+        # 2. Report / Experience states
 
-            return "ok"
+        if user.current_state.is_active():
+            return handle_state(session=session, user=user,text=text)
 
-        if command == Commands.ABOUT:
-            send_about(user.bale_user_id)
+        # 3. Chat mode
 
-            return "ok" 
-        
-        if command == Commands.USER_PANEL:
-            send_user_panel(user.bale_user_id)
+        if user.current_state == UserState.CHAT:
+            return handle_chat(session=session,user=user, text=text)
 
-            return "ok"
-        
-        if command == Commands.LAST_REPORT:
-            report = get_last_report(session, user.id)
+        # 4. Unknown input
 
-            send_last_report(user_id=user.bale_user_id,report=report)
-
-            return "ok"
-            
-        if command == Commands.COUNT_REPORT:
-            send_report_count(user_id=user.bale_user_id,report_count=user.report_count)
-
-            return "ok"
-        
-        if command == Commands.CHAT_MODE:
-            user.current_state = UserState.CHAT
-            session.commit()
-
-            send_message(user.bale_user_id, "به حالت گفت و گو با هوش مصنویی وارد شدید!")
-
-            return "ok"
-        
-        if command == Commands.REPORT:
-
-            payload = {
-                "chat_id": user.bale_user_id,
-                "text": (
-                        "قصد ثبت گزارش دارید یا تجربه ؟\n"
-                        "یکی از گزینه‌های زیر را انتخاب کنید."
-                ),
-                "reply_markup": {
-                "inline_keyboard": [
-                    [{"text": "ثبت تجربه", "callback_data": UserState.EXPERIENCE.value}],
-                    [{"text": "ثبت گزارش", "callback_data": UserState.REPORT.value}]
-                ]
-                },
-            }
-
-            post_message(payload)
-            return "ok" 
-        
-        if text == UserState.REPORT.value:
-            user.current_state = UserState.REPORT
-            draft = ReportDraft()
-            draft.user_id = user.id
-            session.add(draft)
-            session.commit()
-
-            send_message(user.bale_user_id,"عنوان گزارش خود را وارد کنید:")
-
-            return "ok"
-
-        if text == UserState.EXPERIENCE.value:
-            user.current_state = UserState.EXPERIENCE
-            draft = ExperienceDraft()
-            draft.user_id = user.id
-            session.add(draft)
-            session.commit()
-
-            send_message(user.bale_user_id, "عنوان تجربه خود را وارد کنید:")
-
-            return "ok"
-    
-        if command == Commands.EXIT:
-            user.current_state = UserState.NORMAL
-            session.commit()
-
-            send_message(user.bale_user_id, "از حالت گفتگو خارج شدید.")
-        
-            return "ok"
-
-        if user.current_state.not_normal_or_chat():
-            user.current_state = text
-            result = process_report_or_exper(
-                session=session,
-                user=user,
-                text=text,
-            )
-            user.current_state = result.next_state
-            session.commit()
-
-            if result.keyboard == None :
-                send_message(chat_id=user.bale_user_id,text=result.message)
-
-            if result.keyboard != None :
-                payload = {
-                    "chat_id": user.bale_user_id,
-                    "text": (
-                            result.message
-                    ),
-                    "reply_markup": {
-                        "inline_keyboard": result.keyboard
-                    },
-                }
-
-                post_message(payload)
-
-        # Chat-Mode
-        if user.current_state == UserState.CHAT :
-            answer = ask_llm(command)
-            send_message(user.bale_user_id, answer)
-
-            return "ok"
         return None
-    
+
     except SQLAlchemyError as e:
         session.rollback()
 
-        print(f"SQL ERROR ! :{e}")
+        print(f"SQL ERROR: {e}")
 
         payload = {
-            "chat_id": user.bale_user_id,
+            "chat_id": bale_user_id,
             "text": (
-                    "بازو دچار ایراد فنی شد!\n"
-                    "یکی از گزینه‌های زیر را انتخاب کنید."
+                "ربات دچار ایراد فنی شد!\n"
+                "یکی از گزینه‌های زیر را انتخاب کنید."
             ),
             "reply_markup": {
-            "inline_keyboard": [
-                [{"text": "گفت‌وگو با مدل زبانی", "callback_data": Commands.CHAT_MODE}],
-                [{"text": "ثبت گزارش", "callback_data": Commands.REPORT}],
-                [{"text": "درباره ما", "callback_data": Commands.ABOUT}]
-            ]
+                "inline_keyboard": [
+                    [
+                        {
+                            "text": "گفت‌وگو با مدل زبانی",
+                            "callback_data": Commands.CHAT_MODE,
+                        }
+                    ],
+                    [
+                        {
+                            "text": "ثبت گزارش",
+                            "callback_data": Commands.REPORT,
+                        }
+                    ],
+                    [
+                        {
+                            "text": "درباره ما",
+                            "callback_data": Commands.ABOUT,
+                        }
+                    ],
+                ]
             },
         }
 
         post_message(payload)
 
-        return "ok"
+        return "database-error"
+
+

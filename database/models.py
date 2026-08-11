@@ -9,6 +9,7 @@ from sqlalchemy import Enum as SQLEnum
 class Base(DeclarativeBase):
     pass
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -25,6 +26,7 @@ class User(Base):
     report : Mapped[list["Report"]] = relationship(back_populates="user")
 
     experience : Mapped[list["Experience"]] = relationship(back_populates="user")
+
 
 class Report(Base):
     __tablename__= "reports"
@@ -74,6 +76,7 @@ class ReportDraft(Base):
 
     priority : Mapped[ReportPriority | None] = mapped_column(SQLEnum(ReportPriority))
 
+
 class Experience(Base):
     __tablename__ = "experiences"
 
@@ -90,6 +93,7 @@ class Experience(Base):
     created_at : Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     user : Mapped["User"] = relationship(back_populates="experience")
+
 
 class ExperienceDraft(Base):
     __tablename__= "experience_drafts"
@@ -112,5 +116,6 @@ class ExperienceDraft(Base):
     description : Mapped[str | None] = mapped_column()
 
     priority : Mapped[ReportPriority | None] = mapped_column(SQLEnum(ReportPriority))
+
     
 Base.metadata.create_all(engine)
