@@ -4,13 +4,11 @@ cd "$(dirname "$0")/.."
 
 source .venv/bin/activate
 
-
 echo "=== Creating SSH Tunnel ==="
 
-rm runtime/tunnel_url.txt runtime/tunnel.log
 
 ssh -o StrictHostKeyChecking=no \
-    -R 80:localhost:5006 \
+    -R 80:localhost:5010 \
     localhost.run > runtime/tunnel.log 2>&1 &
 
 

@@ -1,4 +1,4 @@
-from handlers.rag.report import process_report_or_exper
+from handlers.report import process_report_or_exper
 from database.db import SessionLocal 
 from database.models import User
 from core.enums import UserState

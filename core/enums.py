@@ -36,14 +36,23 @@ class UserState(Enum):
     EXPERIENCE_CATEGORY = "ExperienceCategory"
     EXPERIENCE_TITLE = "ExperienceTitle"
 
-    def is_active(self):
-        """ this function retruns true when user wants Submit Report or Experience
+    def is_report(self):
+        """ this function retruns true when user wants Submit Report
 
         Returns: 
             Boolian : True/False
         """
 
-        return self is not UserState.NORMAL, UserState.CHAT
+        return self.value.startswith(self.REPORT.value)
+    
+    def is_experience(self):
+            """ this function retruns true when user wants Submit Experience
+    
+            Returns: 
+                Boolian : True/False
+            """
+    
+            return self.value.startswith(self.EXPERIENCE.value)
     
 class ExperienceCategory(Enum):
     INNOVATION = "Innovation"

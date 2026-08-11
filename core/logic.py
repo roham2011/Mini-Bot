@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from handlers.message import send_about, send_help, send_start_menu, send_user_panel, send_last_report, send_report_count
 from database.crud import get_last_report
 from handlers.rag.chat import ask_llm
-from handlers.rag.report import process_report_or_exper
+from handlers.report import process_report_or_exper
 from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
 from database.models import UserState , ReportDraft , ExperienceDraft , User
@@ -135,7 +135,7 @@ def handle_exit(session: Session, user: User ,text: str):
 # State Handler
 
 
-def handle_state(session: Session, user: User ,text: str):
+def handle_state_report(session: Session, user: User ,text: str):
     result = process_report_or_exper(session=session,user=user, text=text)
 
     user.current_state = result.next_state
@@ -158,6 +158,28 @@ def handle_state(session: Session, user: User ,text: str):
 
     return "state-ok"
 
+def handle_state_experience(session: Session, user: User ,text: str):
+    result = process_report_or_exper(session=session,user=user, text=text)
+
+    user.current_state = result.next_state
+
+    session.commit()
+
+    if result.keyboard is None:
+        send_message(chat_id=user.bale_user_id,text=result.message,)
+
+    else:
+        payload = {
+            "chat_id": user.bale_user_id,
+            "text": result.message,
+            "reply_markup": {
+                "inline_keyboard": result.keyboard,
+            },
+        }
+
+        post_message(payload)
+
+    return "state-ok"
 
 def handle_chat(session: Session,user: User,text: str,):
     answer = ask_llm(text)
@@ -202,19 +224,25 @@ def command_handler(session: Session,text: str,bale_user_id: str,first_name: str
         handler = COMMAND_HANDLERS.get(command)
 
         if handler is not None:
+            print(f"\n---COMMAND--- = {command}\n")
             return handler(session=session,user=user,text=text)
 
-        # 2. Report / Experience states
+        # 2. Report states
 
-        if user.current_state.is_active():
-            return handle_state(session=session, user=user,text=text)
+        if user.current_state.is_report():
+            return handle_state_report(session=session, user=user,text=text)
+        
+        # 3. Experience states
 
-        # 3. Chat mode
+        if user.current_state.is_experience():
+            return handle_state_experience(session=session, user=user,text=text)
+        
+        # 4. Chat mode
 
         if user.current_state == UserState.CHAT:
             return handle_chat(session=session,user=user, text=text)
 
-        # 4. Unknown input
+        # 5. Unknown input
 
         return None
 
