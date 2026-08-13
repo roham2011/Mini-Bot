@@ -7,7 +7,7 @@ class ReportPriority(Enum):
     UNKNOWN= "Unknown"
     MEDIUM = "Medium"
     HIGH = "High"
-    LOW = "Hello World!"
+    LOW = "Low"
 
     # when user does not enter the priority
 
