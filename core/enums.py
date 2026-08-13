@@ -7,7 +7,7 @@ class ReportPriority(Enum):
     UNKNOWN= "Unknown"
     MEDIUM = "Medium"
     HIGH = "High"
-    LOW = "Low"
+    LOW = "Hello World!"
 
     # when user does not enter the priority
 
@@ -17,7 +17,7 @@ class ReportCategory(Enum):
     OTHER = "Other"
     ERROR = "Error"
     BUG = "Bug"
-
+    
 # all User_stats
 class UserState(Enum):
     NORMAL = "Normal"
