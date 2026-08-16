@@ -67,7 +67,7 @@ REPORT_STEPS = {
 }
 
 def process_steps_report(text:str , session:Session, user:User ) -> StepResult :
-    """this function processes next step in submit report and submit Experience
+    """this function processes next step in submit report 
 
     Args:
         text (str): user bot-input
@@ -77,55 +77,11 @@ def process_steps_report(text:str , session:Session, user:User ) -> StepResult :
     Returns:
         StepResult: retrun this to specify next step
     """    
-    # define report Conditions here
-    if user.current_state == UserState.REPORT:
+    draft = get_report_draft(session=session,user_id=user.id)
 
-        user.current_state = UserState.REPORT_TITLE
-        draft = get_report_draft(session=session , user_id=user.id)
-        handler = REPORT_STEPS.get(user.current_state)
+    handler = REPORT_STEPS.get(user.current_state)
 
-        if user.current_state == UserState.REPORT_TITLE:
-            handler(session=session , text=text , draft=draft)
+    if handler is None:
+        raise ValueError(f"Invalid report state: {user.current_state}")
 
-        if user.current_state == UserState.REPORT_CATEGORY  :
-            draft.category = ReportCategory(text)
-            session.add(draft)
-
-            return StepResult(
-                message="اولیت گزارش خود را انتخاب کنید:",
-                next_state= UserState.REPORT_PRIORITY ,
-                finished= False,
-                keyboard=[
-                            [
-                                {"text": "اولیت پایین", "callback_data": ReportPriority.LOW.value},
-                                {"text": "الویت متوسط", "callback_data": ReportPriority.MEDIUM.value},
-                                {"text": "اولیت بالا", "callback_data":  ReportPriority.HIGH.value},
-                                {"text": "بحرانی", "callback_data": ReportPriority.CRITICAL.value}
-                            ]
-                        ])
-            
-        if user.current_state == UserState.REPORT_PRIORITY :
-            draft.priority = ReportPriority(text)
-
-            session.add(draft)
-
-            return StepResult(
-                message= "توضیحات گزارش خود را وارد کنید:",
-                next_state= UserState.REPORT_DESCRIPTION,
-                finished= False
-            ) 
-        
-        if user.current_state == UserState.REPORT_DESCRIPTION :
-            draft.description= text
-
-            session.add(draft)
-            creat_report_from_draft(session=session,draft=draft)
-
-            return StepResult(
-                message= "گزارش شما ثبت شد.",
-                next_state= UserState.NORMAL,
-                finished= True
-            )
-        
-        if user.current_state == UserState.EXPERIENCE_TITLE:
-            return 
+    return handler(session=session,text=text,draft=draft) 

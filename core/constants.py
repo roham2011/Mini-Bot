@@ -4,7 +4,7 @@ class Commands:
     HELP = "/help"
     ABOUT = "/about"
 
-    REPORT = "/report"
+    DATA_ENTRY = "/data_entry"
     CHAT_MODE = "/chat_mode"
     USER_PANEL = "/user_panel"
 

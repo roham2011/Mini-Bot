@@ -13,7 +13,10 @@ echo  Starting Bale Bot
 echo "================================================"
 
 # over write app.log 
-echo "================================================================= IN THE NAME OF GOD =================================================================" > runtime/app.log
+echo "==================================================================================================================================" > runtime/app.log
+echo "                                                        IN THE NAME OF GOD                                                        " >> runtime/app.log
+echo "==================================================================================================================================" >> runtime/app.log
+PORT=$(python -c "from config import APP_PORT; print(APP_PORT)")
 
 echo "================================================"
 echo "Creating SSH Tunne"
@@ -25,7 +28,7 @@ rm -f runtime/tunnel_url.txt
 ssh \
     -o ServerAliveInterval=60 \
     -o StrictHostKeyChecking=no \
-    -R 80:localhost:5011 \
+    -R 80:localhost:$PORT \
     nokey@localhost.run \
     > runtime/tunnel.log 2>&1 &
 

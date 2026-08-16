@@ -5,6 +5,7 @@ from handlers.message import send_about, send_help, send_start_menu, send_user_p
 from database.crud import get_last_report
 from handlers.rag.chat import ask_llm
 from handlers.report import process_steps_report
+from handlers.experience import experience_steps_handler
 from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
 from database.models import UserState , ReportDraft , ExperienceDraft , User
@@ -63,8 +64,7 @@ def handle_chat_mode(session: Session, user: User ,text: str):
 
     return "chat-ok"
 
-
-def handle_report_command(session: Session, user: User ,text: str):
+def handle_data_entry(session: Session, user: User ,text: str):
     payload = {
         "chat_id": user.bale_user_id,
         "text": (
@@ -158,15 +158,15 @@ def handle_state_report(session: Session, user: User ,text: str):
 
     return "state-ok"
 
-def handle_state_experience(session: Session, user: User ,text: str):
-    result = process_steps_report(session=session,user=user, text=text)
+def handle_state_experience(session: Session, user: User, text: str):
+    result = experience_steps_handler(session=session,user=user,text=text)
 
     user.current_state = result.next_state
 
     session.commit()
 
     if result.keyboard is None:
-        send_message(chat_id=user.bale_user_id,text=result.message,)
+        send_message(chat_id=user.bale_user_id,text=result.message)
 
     else:
         payload = {
@@ -179,7 +179,7 @@ def handle_state_experience(session: Session, user: User ,text: str):
 
         post_message(payload)
 
-    return "state-ok"
+    return "state-experience-ok"
 
 def handle_chat(session: Session,user: User,text: str,):
     answer = ask_llm(text)
@@ -200,8 +200,9 @@ COMMAND_HANDLERS = {
     Commands.LAST_REPORT.lower(): handle_last_report,
     Commands.COUNT_REPORT.lower(): handle_report_count,
     Commands.CHAT_MODE.lower(): handle_chat_mode,
-    Commands.REPORT.lower(): handle_report_command,
     Commands.EXIT.lower(): handle_exit,
+
+    Commands.DATA_ENTRY.lower(): handle_data_entry,
     # user stats
     UserState.REPORT.value.lower(): handle_report_start,
     UserState.EXPERIENCE.value.lower(): handle_experience_start,
@@ -210,39 +211,76 @@ COMMAND_HANDLERS = {
 
 # Main Handler
 
-def command_handler(session: Session,text: str,bale_user_id: str,first_name: str):
+def command_handler(session: Session,text: str,bale_user_id: str,first_name: str , update_id: int):
     try:
         user = get_or_save_user(session=session,user_id=bale_user_id,first_name=first_name)
 
-        print("HANDLE:", text)
-        print("STATE:", user.current_state)
+        command = text.strip().lower()
+
+        print(f"\n\n========================= [UPDATE {update_id}] =========================")
+        print(f"USER: {bale_user_id}")
+        print(f"COMMAND: {text}")
+        if user.current_state == None :
+            print("STATE: New User")
+        else:
+            print(f"STATE: {user.current_state.value}")
+        print("="*64)
 
         command = text.strip().lower()
 
         # 1. Commands / callbacks
 
         handler = COMMAND_HANDLERS.get(command)
-        print(f"\n---------------COMMAND--------------- = {command}\n")
 
         if handler is not None:
-            return handler(session=session,user=user,text=text)
+            action = handler.__name__
+
+            result = handler(session=session,user=user,text=text,)
+
+            print(f"ACTION: {action}")
+            print(f"RESULT: {result}")
+
+            return result
 
         # 2. Report states
 
         if user.current_state.is_report():
-            return handle_state_report(session=session, user=user,text=text)
+
+            current_state = user.current_state
+
+            result = handle_state_report(session=session, user=user,text=text)
+        
+            print(f"ACTION: handle_state_report")
+            print(f"NEXT: {user.current_state.value}")
+            print(f"RESULT: {result}")
+
+            return result
         
         # 3. Experience states
 
         if user.current_state.is_experience():
-            return handle_state_experience(session=session, user=user,text=text)
+
+            result = handle_state_experience(session=session,user=user,text=text)
+
+            print(f"ACTION: handle_state_experience")
+            print(f"NEXT: {user.current_state.value}")
+            print(f"RESULT: {result}")
+
+            return result
         
         # 4. Chat mode
 
         if user.current_state == UserState.CHAT:
-            return handle_chat(session=session,user=user, text=text)
+            result =  handle_chat(session=session,user=user, text=text)
 
+            print(f"RESULT: {result}")
+
+            return result
+        
         # 5. Unknown input
+
+        print("ACTION: None")
+        print("RESULT: unknown-input")
 
         return None
 

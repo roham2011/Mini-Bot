@@ -30,7 +30,7 @@ class UserState(Enum):
 
     # Exprience stats
     EXPERIENCE = "Experience"
-    EXPERIENCE_DESCRIPTION = "EperienceDescription"
+    EXPERIENCE_DESCRIPTION = "ExperienceDescription"
     EXPERIENCE_CATEGORY = "ExperienceCategory"
     EXPERIENCE_TITLE = "ExperienceTitle"
 

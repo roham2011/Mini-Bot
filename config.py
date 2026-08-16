@@ -7,7 +7,7 @@ TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 URL = f"https://tapi.bale.ai/bot{TOKEN}/sendMessage"
 
 # ip port in flask 
-PORT = 5011
+APP_PORT = 5026
 
 # Main Flask addres
 MAIN_ROUTE = "/webhook"
@@ -19,7 +19,13 @@ TEST_ROUTE = "/test/<name>"
 HOST = "127.0.0.1"
 
 # import URL from tunneled Host
-Global_URL = Path("runtime/tunnel_url.txt").read_text().strip()
+TUNNEL_URL_FILE = Path("runtime/tunnel_url.txt")
+
+if TUNNEL_URL_FILE.exists():
+    Global_URL = TUNNEL_URL_FILE.read_text().strip()
+else:
+    Global_URL = ""
+
 
 # set route for set webhook
 Webhook_URL = f"{Global_URL}{MAIN_ROUTE}"

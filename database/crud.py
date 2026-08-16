@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select , func
-from .models import Report , User , ReportDraft ,  ExperienceDraft
+from .models import Report , User , ReportDraft ,  ExperienceDraft , Experience
 
 def get_or_save_user(session:Session, user_id:int, first_name:str):
     """ this function takes user-data and create object from data (if user is exists returns user)
@@ -77,6 +77,28 @@ def creat_report_from_draft(session:Session , draft:ReportDraft):
     session.delete(draft)
 
     return report
+
+def creat_exper_from_draft(session:Session , draft:ReportDraft):
+    """this function afther create experience-draft in wizard adds draft in DB
+
+    Args:
+        session (Session): for management draft from DB
+        draft (ReportDraft): for add it in DB
+
+    Returns:
+        report(object): in fact this is the same Draft
+    """    
+    experience = Experience(
+        user_id = draft.user_id,
+        title = draft.title,
+        category = draft.category,
+        description = draft.description
+        )
+    
+    session.add(experience)
+    session.delete(draft)
+
+    return experience
 
 def get_all_reports(session:Session , user_id:int):
     

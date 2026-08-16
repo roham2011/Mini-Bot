@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped , mapped_column , relationship
 from sqlalchemy import ForeignKey 
 from .db import engine
 from datetime import datetime
-from core.enums import ReportPriority , ReportCategory ,UserState
+from core.enums import ReportPriority , ReportCategory ,UserState , ExperienceCategory
 from sqlalchemy import Enum as SQLEnum
 
 class Base(DeclarativeBase):
@@ -88,7 +88,7 @@ class Experience(Base):
     
     description : Mapped[str] = mapped_column()
     
-    category : Mapped[ReportCategory] = mapped_column(SQLEnum(ReportCategory),default=ReportCategory.OTHER)
+    category : Mapped[ReportCategory] = mapped_column(SQLEnum(ExperienceCategory),default=ExperienceCategory.OTHER)
 
     created_at : Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
@@ -111,7 +111,7 @@ class ExperienceDraft(Base):
 
     title : Mapped[str | None] = mapped_column()
 
-    category : Mapped[ReportCategory | None] = mapped_column(SQLEnum(ReportCategory))
+    category : Mapped[ReportCategory | None] = mapped_column(SQLEnum(ExperienceCategory))
 
     description : Mapped[str | None] = mapped_column()
 

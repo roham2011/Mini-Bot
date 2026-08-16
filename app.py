@@ -2,7 +2,7 @@ from flask import Flask, request
 from core.logic import command_handler
 from utils.Set_Webhook import set_webh
 from database.db import SessionLocal
-from config import Webhook_URL , DEBUG , PORT , MAIN_ROUTE , TEST_ROUTE , HOST
+from config import Webhook_URL , DEBUG , APP_PORT , MAIN_ROUTE , TEST_ROUTE , HOST
 
 app = Flask(__name__)
 
@@ -12,8 +12,6 @@ set_webh(Webhook_URL)
 def webhook():
     """this function Handle Bale webhook requests."""
     update = request.get_json(silent=True) or {}
-
-    print("New Data:", update)
 
     text = None
     bale_user_id = None
@@ -32,8 +30,6 @@ def webhook():
     if text is None or bale_user_id is None:
         return "ok"
 
-    print("User:", bale_user_id)
-    print("Text:", text)
     
     with SessionLocal() as session :
         try:
@@ -42,6 +38,7 @@ def webhook():
             text=text,
             bale_user_id=bale_user_id,
             first_name=first_name,
+            update_id=update["update_id"],
         )
             
         except Exception :
@@ -56,4 +53,4 @@ def test_webhook(name: str):
 
 
 if __name__ == "__main__":
-   app.run(host=HOST, port=PORT, debug=DEBUG)
+   app.run(host=HOST, port=APP_PORT, debug=DEBUG)
