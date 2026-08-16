@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from handlers.message import send_about, send_help, send_start_menu, send_user_panel, send_last_report, send_report_count
 from database.crud import get_last_report
 from handlers.rag.chat import ask_llm
-from handlers.report import process_report_or_exper
+from handlers.report import process_steps_report
 from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
 from database.models import UserState , ReportDraft , ExperienceDraft , User
@@ -76,13 +76,13 @@ def handle_report_command(session: Session, user: User ,text: str):
                 [
                     {
                         "text": "ثبت تجربه",
-                        "callback_data": UserState.EXPERIENCE_TITLE.value,
+                        "callback_data": UserState.EXPERIENCE.value,
                     }
                 ],
                 [
                     {
                         "text": "ثبت گزارش",
-                        "callback_data": UserState.REPORT_TITLE.value,
+                        "callback_data": UserState.REPORT.value,
                     }
                 ],
             ]
@@ -136,7 +136,7 @@ def handle_exit(session: Session, user: User ,text: str):
 
 
 def handle_state_report(session: Session, user: User ,text: str):
-    result = process_report_or_exper(session=session,user=user, text=text)
+    result = process_steps_report(session=session,user=user, text=text)
 
     user.current_state = result.next_state
 
@@ -159,7 +159,7 @@ def handle_state_report(session: Session, user: User ,text: str):
     return "state-ok"
 
 def handle_state_experience(session: Session, user: User ,text: str):
-    result = process_report_or_exper(session=session,user=user, text=text)
+    result = process_steps_report(session=session,user=user, text=text)
 
     user.current_state = result.next_state
 
@@ -193,18 +193,18 @@ def handle_chat(session: Session,user: User,text: str,):
 # Dictionaries
 
 COMMAND_HANDLERS = {
-    Commands.START: handle_start,
-    Commands.HELP: handle_help,
-    Commands.ABOUT: handle_about,
-    Commands.USER_PANEL: handle_user_panel,
-    Commands.LAST_REPORT: handle_last_report,
-    Commands.COUNT_REPORT: handle_report_count,
-    Commands.CHAT_MODE: handle_chat_mode,
-    Commands.REPORT: handle_report_command,
-    Commands.EXIT: handle_exit,
-
-    UserState.REPORT.value: handle_report_start,
-    UserState.EXPERIENCE.value: handle_experience_start,
+    Commands.START.lower(): handle_start,
+    Commands.HELP.lower(): handle_help,
+    Commands.ABOUT.lower(): handle_about,
+    Commands.USER_PANEL.lower(): handle_user_panel,
+    Commands.LAST_REPORT.lower(): handle_last_report,
+    Commands.COUNT_REPORT.lower(): handle_report_count,
+    Commands.CHAT_MODE.lower(): handle_chat_mode,
+    Commands.REPORT.lower(): handle_report_command,
+    Commands.EXIT.lower(): handle_exit,
+    # user stats
+    UserState.REPORT.value.lower(): handle_report_start,
+    UserState.EXPERIENCE.value.lower(): handle_experience_start,
 }
 
 
@@ -222,9 +222,9 @@ def command_handler(session: Session,text: str,bale_user_id: str,first_name: str
         # 1. Commands / callbacks
 
         handler = COMMAND_HANDLERS.get(command)
+        print(f"\n---------------COMMAND--------------- = {command}\n")
 
         if handler is not None:
-            print(f"\n---COMMAND--- = {command}\n")
             return handler(session=session,user=user,text=text)
 
         # 2. Report states

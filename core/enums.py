@@ -4,12 +4,10 @@ from enum import Enum
 # all Priority_Report
 class ReportPriority(Enum):
     CRITICAL = "Critical"
-    UNKNOWN= "Unknown"
+    UNKNOWN= "Unknown"   # when user does not enter the priority
     MEDIUM = "Medium"
     HIGH = "High"
     LOW = "Low"
-
-    # when user does not enter the priority
 
 
 class ReportCategory(Enum):

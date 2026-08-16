@@ -1,19 +1,35 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-cd "$(dirname "$0")/.."
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+cd "$PROJECT_DIR" || exit 1
+
+mkdir -p runtime
 
 source .venv/bin/activate
 
-echo "=== Creating SSH Tunnel ==="
+echo "================================================"
+echo  Starting Bale Bot
+echo "================================================"
 
+# over write app.log 
+echo "================================================================= IN THE NAME OF GOD =================================================================" > runtime/app.log
 
-ssh -o StrictHostKeyChecking=no \
-    -R 80:localhost:5010 \
-    localhost.run > runtime/tunnel.log 2>&1 &
+echo "================================================"
+echo "Creating SSH Tunne"
+echo "================================================"
 
+rm -f runtime/tunnel.log
+rm -f runtime/tunnel_url.txt
 
-SSH_PID=$!
+ssh \
+    -o ServerAliveInterval=60 \
+    -o StrictHostKeyChecking=no \
+    -R 80:localhost:5011 \
+    nokey@localhost.run \
+    > runtime/tunnel.log 2>&1 &
 
+TUNNEL_PID=$!
 
 echo "Waiting for tunnel..."
 
@@ -25,16 +41,24 @@ do
 
         echo "$URL" > runtime/tunnel_url.txt
 
-        echo "Tunnel URL:"s
+        echo "Tunnel URL:"
         echo "$URL"
 
         break
     fi
 
+    if ! kill -0 "$TUNNEL_PID" 2>/dev/null
+    then
+        echo "SSH tunnel stopped unexpectedly."
+        cat runtime/tunnel.log
+        exit 1
+    fi
+
     sleep 1
 done
 
+echo "================================================"
+echo "Bale Bot is running"
+echo "================================================"
 
-echo "=== Starting Bale Bot ==="
-
-python app.py
+python -u app.py >> runtime/app.log 2>&1

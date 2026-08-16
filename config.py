@@ -7,7 +7,7 @@ TOKEN = "1744473316:V8sHnllCPQBKHRSHDMCi6IDvRmrKIOSQqas"
 URL = f"https://tapi.bale.ai/bot{TOKEN}/sendMessage"
 
 # ip port in flask 
-PORT = 5010
+PORT = 5011
 
 # Main Flask addres
 MAIN_ROUTE = "/webhook"

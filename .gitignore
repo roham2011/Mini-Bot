@@ -32,6 +32,7 @@ env/
 
 # pytest
 .pytest_cache/
+*test
 
 # mypy
 .mypy_cache/
@@ -42,3 +43,6 @@ env/
 # Build
 dist/
 build/
+
+# Scripts
+.scripts/test.sh
