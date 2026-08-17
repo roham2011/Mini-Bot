@@ -10,7 +10,7 @@ from utils.send_message import send_message , post_message
 from database.crud import   get_or_save_user
 from database.models import UserState , ReportDraft , ExperienceDraft , User
 from .constants import Commands
-from .enums import ExperienceCategory
+from .validates import get_validation_message
 # Command Handlers
 
 def handle_start(session: Session, user: User ,text: str):
@@ -139,16 +139,19 @@ def handle_state_report(session: Session, user: User ,text: str):
     result = process_steps_report(session=session,user=user, text=text)
 
     user.current_state = result.next_state
+    if result.message == None:
+        print(f"INPUT_ERROR_CODE={result.error_code}")
+    message = get_validation_message(result.error_code or result.message)
 
     session.commit()
 
     if result.keyboard is None:
-        send_message(chat_id=user.bale_user_id,text=result.message,)
+        send_message(chat_id=user.bale_user_id,text=message,)
 
     else:
         payload = {
             "chat_id": user.bale_user_id,
-            "text": result.message,
+            "text": message,
             "reply_markup": {
                 "inline_keyboard": result.keyboard,
             },
@@ -162,16 +165,17 @@ def handle_state_experience(session: Session, user: User, text: str):
     result = experience_steps_handler(session=session,user=user,text=text)
 
     user.current_state = result.next_state
+    message = get_validation_message(result.error_code or result.message)
 
     session.commit()
 
     if result.keyboard is None:
-        send_message(chat_id=user.bale_user_id,text=result.message)
+        send_message(chat_id=user.bale_user_id,text=message)
 
     else:
         payload = {
             "chat_id": user.bale_user_id,
-            "text": result.message,
+            "text": message,
             "reply_markup": {
                 "inline_keyboard": result.keyboard,
             },
@@ -249,7 +253,9 @@ def command_handler(session: Session,text: str,bale_user_id: str,first_name: str
             current_state = user.current_state
 
             result = handle_state_report(session=session, user=user,text=text)
-        
+
+            session.commit()
+
             print(f"ACTION: handle_state_report")
             print(f"NEXT: {user.current_state.value}")
             print(f"RESULT: {result}")
@@ -261,6 +267,8 @@ def command_handler(session: Session,text: str,bale_user_id: str,first_name: str
         if user.current_state.is_experience():
 
             result = handle_state_experience(session=session,user=user,text=text)
+
+            session.commit()
 
             print(f"ACTION: handle_state_experience")
             print(f"NEXT: {user.current_state.value}")

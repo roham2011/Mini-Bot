@@ -40,7 +40,7 @@ def webhook():
             first_name=first_name,
             update_id=update["update_id"],
         )
-            
+            session.commit()
         except Exception :
             session.rollback()
             raise

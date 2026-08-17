@@ -3,36 +3,36 @@ from enum import Enum
 
 # all Priority_Report
 class ReportPriority(Enum):
-    CRITICAL = "Critical"
-    UNKNOWN= "Unknown"   # when user does not enter the priority
-    MEDIUM = "Medium"
-    HIGH = "High"
-    LOW = "Low"
+    CRITICAL = "critical"
+    UNKNOWN= "unknown"   # when user does not enter the priority
+    MEDIUM = "medium"
+    HIGH = "high"
+    LOW = "low"
 
 
 class ReportCategory(Enum):
-    BREAKDOWN = "Breakdown"
-    OTHER = "Other"
-    ERROR = "Error"
-    BUG = "Bug"
+    BREAKDOWN = "breakdown"
+    OTHER = "other"
+    ERROR = "error"
+    BUG = "bug"
     
 # all User_stats
 class UserState(Enum):
-    NORMAL = "Normal"
-    CHAT = "Chat"
+    NORMAL = "normal"
+    CHAT = "chat"
 
     # Report stats
-    REPORT = "Report"
-    REPORT_DESCRIPTION = "ReportDescription"
-    REPORT_CATEGORY = "ReportCategory"
-    REPORT_PRIORITY = "ReportPriority"
-    REPORT_TITLE = "ReportTitle"
+    REPORT = "report"
+    REPORT_DESCRIPTION = "report_description"
+    REPORT_CATEGORY = "report_category"
+    REPORT_PRIORITY = "report_priority"
+    REPORT_TITLE = "report_title"
 
     # Exprience stats
-    EXPERIENCE = "Experience"
-    EXPERIENCE_DESCRIPTION = "ExperienceDescription"
-    EXPERIENCE_CATEGORY = "ExperienceCategory"
-    EXPERIENCE_TITLE = "ExperienceTitle"
+    EXPERIENCE = "experience"
+    EXPERIENCE_DESCRIPTION = "experience_description"
+    EXPERIENCE_CATEGORY = "experience_category"
+    EXPERIENCE_TITLE = "experience_title"
 
     def is_report(self):
         """ this function retruns true when user wants Submit Report
@@ -53,15 +53,21 @@ class UserState(Enum):
             return self.value.startswith(self.EXPERIENCE.value)
     
 class ExperienceCategory(Enum):
-    INNOVATION = "Innovation"
-    DEBUGING = "Debuging"
-    OTHER = "Other"
-    IDEA = "Idea"
+    INNOVATION = "innovation"
+    DEBUGING = "debuging"
+    OTHER = "other"
+    IDEA = "idea"
 
 @dataclass(slots=True)
 class StepResult():
-    message : str
     next_state : UserState
     finished : bool = True 
-    keyboard : list | None = None 
     experience : bool = False 
+    keyboard : list | None = None
+    error_code : str | None = None
+    message : str | None = None 
+
+@dataclass(slots=True)
+class ValidatesOutput():
+    status : bool = False
+    message : str | None = None
